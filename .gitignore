@@ -1,0 +1,95 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+venv/
+documents/
+*.egg-info/
+.installed.cfg
+*.egg
+uploads/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# Rope
+.ropeproject
+
+# Django stuff:
+*.log
+*.pot
+*.mo
+api_crud/local_settings.py
+local_settings.py
+local_settings.dev.py
+local_settings.prod.py
+local_settings.test.py
+local_settings.staging.py
+deploy.json
+deploy_dev.json
+deploy_staging.json
+innovation-a0504-firebase-adminsdk-5l2c3-7cef433782.json
+wikipro-dev-firebase-adminsdk.json
+
+# Sphinx documentation
+docs/_build/
+db.sqlite3
+note.txt
+.DS_Store
+.DS_Store?
+
+.idea/
+.vscode/
+
+#need to add more configuration files to ignore
+
+# React stuff
+yarn.lock
+/node_modules
+
+celerybeat-schedule
+
+
+#collect static files
+/static
+# docker
+data/db
+
+#Backup files
+old/
+
+# Virtual Env
+Scripts/
+pyvenv.cfg
+.env
+models/
