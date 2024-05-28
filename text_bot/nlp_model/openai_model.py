@@ -93,7 +93,7 @@ class OpenaiModel(NlpModel):
         return response
 
 
-    def get_embeddings(self, sentences: list[str]) -> list[list[float]]:
+    def get_embeddings(self, sentences: List[str]) -> List[List[float]]:
         return self.open_ai_embeddings.embed_documents(sentences)
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
@@ -181,7 +181,7 @@ class OpenaiModel(NlpModel):
     #     # df = pd.read_csv('output/embedded_1k_reviews.csv')
     #     # df['ada_embedding'] = df.ada_embedding.apply(eval).apply(np.array)
     #
-    # def get_embeddings(self, sentences: list[str]) -> ndarray:
+    # def get_embeddings(self, sentences: List[str]) -> ndarray:
     #     vectors = []
     #     batch_size = 512
     #     batch = []

@@ -56,8 +56,6 @@ class ChatQuestion(models.Model):
 
     objects = TopChatQuestionsManager()
 
-    class Meta:
-        ordering = ['-id']
 
 class CTDocument(models.Model):
     class Meta:

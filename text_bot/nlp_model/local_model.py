@@ -29,7 +29,7 @@ class LocalModel(NlpModel):
         )
         self.nlp_prompt_model = OpenaiModel()
 
-    def get_embeddings(self, sentences: list[str]) -> ndarray:
+    def get_embeddings(self, sentences: List[str]) -> ndarray:
 
         vectors = []
         batch_size = 512

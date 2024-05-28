@@ -9,6 +9,55 @@ from pathlib import Path
 import time
 import functools
 
+
+def load_file_content(file_path):
+    """
+    Load the content of the given file path as a string.
+
+    :param file_path: The full path to the file to be read.
+    :return: A string containing the contents of the file.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return file.read()
+    except FileNotFoundError:
+        print(f"The file {file_path} was not found.")
+        return None
+    except OSError as e:
+        print(f"An error occurred: {e}")
+        return None
+
+
+def get_file_paths(directory, extensions=('.cbl', '.cob', '.cpy')):
+    """
+    Get a list of full file paths for all COBOL-related files in a project directory.
+
+    :param directory: The path to the root directory of the COBOL project.
+    :param extensions: A tuple of file extensions to include (defaults to .cbl, .cob, .cpy).
+    :return: A list of full paths to the COBOL files.
+    """
+    cobol_file_paths = []
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.lower().endswith(extensions):
+                full_path = os.path.join(root, file)
+                cobol_file_paths.append(full_path)
+    return cobol_file_paths
+
+
+def load_files_contents(self, project_root_path):
+    cobol_files_contents = []
+    # Walk through the directory
+    for root, dirs, files in os.walk(project_root_path):
+        for file in files:
+            if file.lower().endswith('.cbl') or file.lower().endswith('.cob'):  # Check for .cbl or .cob files
+                full_path = os.path.join(root, file)
+                with open(full_path, 'r', encoding='utf-8', errors='ignore') as cobol_file:
+                    contents = cobol_file.read()
+                    cobol_files_contents.append(contents)
+                    print(f'Loaded COBOL file: {full_path}')
+    return cobol_files_contents
+
 def retry(max_retries=3, initial_delay=1, backoff=2, exceptions=(Exception,)):
     def decorator(func):
         @functools.wraps(func)

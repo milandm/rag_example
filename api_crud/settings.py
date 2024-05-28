@@ -16,13 +16,6 @@ import datetime
 
 load_dotenv()
 
-
-REACT_APP_CONTENTFUL_API_KEY=os.getenv('REACT_APP_CONTENTFUL_API_KEY')
-REACT_APP_CONTENTFUL_GRAPHQL_URL=os.getenv('REACT_APP_CONTENTFUL_GRAPHQL_URL')
-REACT_APP_CONTENTFUL_SPACE_ID=os.getenv('REACT_APP_CONTENTFUL_SPACE_ID')
-REACT_APP_OKTA_CLIENT_ID=os.getenv('REACT_APP_OKTA_CLIENT_ID')
-REACT_APP_OKTA_SERVER_URL=os.getenv('REACT_APP_OKTA_SERVER_URL')
-REACT_APP_PREVIEW_CONTENTFUL_API_KEY=os.getenv('REACT_APP_PREVIEW_CONTENTFUL_API_KEY')
 REACT_APP_TAX3PO_API_KEY= os.getenv('REACT_APP_TAX3PO_API_KEY')
 REACT_APP_TAX3PO_API_DEV_URL= os.getenv('REACT_APP_TAX3PO_API_DEV_URL')
 
@@ -38,18 +31,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'ftov1!91yf@7f7&g2%*@0_e^)ac&f&9jeloc@#v76#^b1dhbl#'
+OPEN_AI_SECRET_KEY = os.getenv('OPEN_AI_SECRET_KEY')
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['*', '10.4.39.16']
-
-
-OKTA_CLIENT = {
-    "orgUrl": REACT_APP_OKTA_SERVER_URL,
-    "token": REACT_APP_OKTA_CLIENT_ID
-}
 
 
 REST_FRAMEWORK = {
@@ -77,7 +67,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
-    'authentication',
     'text_bot',
     'drf_yasg',
     'corsheaders',
@@ -127,9 +116,17 @@ WSGI_APPLICATION = 'api_crud.wsgi.application'
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
 DATABASES = {
+    # 'default': dj_database_url.config(
+    #     default='postgres://testuser:testpassword@db:5432/test'
+    # )
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USERNAME'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT')
+
     }
 }
 
@@ -356,8 +353,8 @@ IR_URL = "https://www.innovationrefunds.com/"
 # Miscellaneous
 SUPPORTED_IMAGE_MIMETYPES = ['image/jpeg', 'image/png', 'image/gif']
 
-# THIS HAS TO BE AT END OF FILE
-try:
-    from api_crud.local_settings import *
-except ImportError:
-    raise Exception("A local_settings.py file is required to run this project")
+# # THIS HAS TO BE AT END OF FILE
+# try:
+#     from api_crud.local_settings import *
+# except ImportError:
+#     raise Exception("A local_settings.py file is required to run this project")

@@ -29,7 +29,6 @@ from api_crud.constants import (
     INDUSTRY,
     STATES,
 )
-from api_crud.local_settings import TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM
 
 
 def label_to_id_transform(id_to_label):

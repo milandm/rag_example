@@ -8,7 +8,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # Your code to create mock data here
         vectorize_documents_engine = ExtractorVectorizeDocumentsEngine(LLamaModel())
-        vectorize_documents_engine.load_semantic_document_chunks_to_db("documents_protocol/protocol_amendment31082023.pdf")
+        vectorize_documents_engine.load_semantic_document_chunks_to_db("cobol_project_code/protocol_amendment31082023.pdf")
         self.stdout.write(self.style.SUCCESS('Successfully created mock data'))
 
 

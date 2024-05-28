@@ -377,7 +377,7 @@ the queries with ’**’. Question: \
 # from langchain.load import dumps, loads
 #
 #
-# def reciprocal_rank_fusion(results: list[list], k=60):
+# def reciprocal_rank_fusion(results: List[list], k=60):
 #     fused_scores = {}
 #     for docs in results:
 #         # Assumes the docs are returned in sorted order of relevance
@@ -499,7 +499,6 @@ Subsection Title: [Details of Subsection]
 Subsection Content Summary: [Brief summary or key points of this subsection]
 Subsection Text :[Here provide subsection full original text content]
 Subsection References:[List of all important concepts and terms that this subsections refers to  taking in account whole containing section text]
-Subsection References:[List of all important concepts and terms that this subsection refers to  taking in account whole containing section text]
 Subsection Topics:[List of all topics and terms that this subsection refers to  taking in account whole containing section text]
 
 
@@ -683,7 +682,7 @@ class PromptTemplateCreator:
     def __init__(self):
         print()
 
-    # def create_similar_sentences_prompt(self, question:str, references_list: list[ScoredPoint]) -> tuple[str, str]:
+    # def create_similar_sentences_prompt(self, question:str, references_list: List[ScoredPoint]) -> tuple[str, str]:
     #
     #     references_text = ""
     #
@@ -701,7 +700,7 @@ class PromptTemplateCreator:
     #     return prompt, references_text
 
     #
-    # def create_recommended_sentences_prompt(self, questions_list:str, references_list: list[ScoredPoint]) -> tuple[str, str]:
+    # def create_recommended_sentences_prompt(self, questions_list:str, references_list: List[ScoredPoint]) -> tuple[str, str]:
     #
     #     questions_text = ""
     #

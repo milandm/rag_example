@@ -1,6 +1,3 @@
-from llama_index import MockEmbedding
-from llama_index.embeddings.base import BaseEmbedding
-
 from sentence_transformers import SentenceTransformer
 import torch
 
@@ -8,10 +5,9 @@ import numpy as np
 from numpy import ndarray
 from tqdm import tqdm
 from text_bot.nlp_model.nlp_model import NlpModel
-from typing import Union, Generator, Any
-from text_bot.nlp_model.openai_model import OpenaiModel
-from llama_cpp import Llama
-
+from typing import Union, Generator, Any, List
+# from llama_index.embeddings.ollama import OllamaEmbedding
+# from llama_index.llms.ollama import Ollama
 
 # # Llama 2 models are 4096
 #
@@ -87,7 +83,7 @@ class LLamaModel(NlpModel):
         # )
         # self.check_and_download_model()
         self.nlp_prompt_model = \
-            Llama(model_path="./models/llama-2-7b-chat.ggmlv3.q2_K.bin",
+            Ollama(model_path="./models/llama-2-7b-chat.ggmlv3.q2_K.bin",
                     n_ctx=1024,
                     n_batch=128,
                     verbose=False)
@@ -132,7 +128,7 @@ class LLamaModel(NlpModel):
 
         model_path = self.download_model_if_not_exists(repo_id, filename, save_path)
 
-    def get_embeddings(self, sentences: list[str]) -> ndarray:
+    def get_embeddings(self, sentences: List[str]) -> ndarray:
 
         vectors = []
         batch_size = 512

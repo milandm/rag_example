@@ -8,7 +8,7 @@ class NlpModel(ABC):
     # VECTOR_PARAMS_SIZE = 1536
 
     @abstractmethod
-    def get_embeddings(self, sentences: Union[str, list[str]]) -> ndarray:
+    def get_embeddings(self, sentences: Union[str, List[str]]) -> ndarray:
         pass
 
     @abstractmethod
