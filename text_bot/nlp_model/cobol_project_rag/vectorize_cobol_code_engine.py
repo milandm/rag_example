@@ -60,7 +60,7 @@ class VectorizeCobolCodeEngine:
             self.logger.info("file_path: "+file_path)
             cobol_file_content = load_file_content(file_path)
             cobol_json = parse_cobol_to_json(cobol_file_content)
-            self.logger.info("cobol_json: "+cobol_json)
+            self.logger.info("cobol_json: "+str(cobol_json))
 
 
 
