@@ -17,7 +17,7 @@ from text_bot.nlp_model.cobol_project_rag.cobol_extraction_promt_template_creato
     DOCUMENT_SYSTEM_MSG_COMPRESSION_V3, \
     DOCUMENT_COMPRESSION_EXTRACT_KEY, \
     DOCUMENT_SYSTEM_MSG_COMPRESSION_CHECK_V1, \
-    DOCUMENT_SYSTEM_MSG_SEMANTIC_TEXT_CHUNKING_V1, \
+    SYSTEM_MSG_COBOL_EXPERT_V1, \
     DOCUMENT_SYSTEM_MSG_QUESTION_STATEMENT_V1, \
     DOCUMENT_SYSTEM_MSG_QUESTION_RELATED_INFORMATION_V1
 
@@ -101,12 +101,51 @@ class CobolExtractionPromptCreator:
     def get_document_semantic_text_chunks(self, documents_split_txt: str, last_previous_semantic_chunk: str):
         # this clean should be removed probably
         # documents_split_txt = self.clean_documents_split(documents_split_txt)
-        semantic_text_chunks_prompt = self.prompt_template_creator.get_extract_cobol_code_chunks_prompt(
+        semantic_text_chunks_prompt = self.prompt_template_creator.get_extract_cobol_code_chunk_info_prompt(
             documents_split_txt, last_previous_semantic_chunk)
-        semantic_text_chunk_openai_response = self.model.send_prompt(DOCUMENT_SYSTEM_MSG_SEMANTIC_TEXT_CHUNKING_V1,
-                                                                      semantic_text_chunks_prompt)
+        semantic_text_chunk_openai_response = self.model.send_prompt(SYSTEM_MSG_COBOL_EXPERT_V1,
+                                                                     semantic_text_chunks_prompt)
         print(str(semantic_text_chunk_openai_response))
         semantic_text_chunks_content = semantic_text_chunk_openai_response.choices[0].message.content
 
         semantic_text_chunks_content_json_list = extract_clean_json_data(semantic_text_chunks_content)
         return semantic_text_chunks_content_json_list
+
+    def extract_cobol_chunk_info(self, division_name, cobol_code_chunk: str):
+        # this clean should be removed probably
+        # documents_split_txt = self.clean_documents_split(documents_split_txt)
+        cobol_chunk_info_prompt = (self.prompt_template_creator
+                                       .get_extract_cobol_code_chunk_info_prompt(division_name, cobol_code_chunk))
+        cobol_chunk_info_openai_response = self.model.send_prompt(SYSTEM_MSG_COBOL_EXPERT_V1,
+                                                                     cobol_chunk_info_prompt)
+        cobol_chunk_info_openai_content = cobol_chunk_info_openai_response.choices[0].message.content
+
+        cobol_chunk_info_content_json_list = extract_clean_json_data(cobol_chunk_info_openai_content)
+        return cobol_chunk_info_content_json_list
+
+
+
+    def summarize_dependencies_info(self, current_cobol_code_extraction,
+                                    children_description_extraction_list,
+                                    dependencies_description_extraction_list):
+        # this clean should be removed probably
+        # documents_split_txt = self.clean_documents_split(documents_split_txt)
+        summarize_dependencies_info_prompt = self.prompt_template_creator.get_summarize_dependencies_info_prompt(current_cobol_code_extraction,
+                                               children_description_extraction_list,
+                                               dependencies_description_extraction_list)
+        summarize_dependencies_info_openai_response = self.model.send_prompt(SYSTEM_MSG_COBOL_EXPERT_V1,
+                                                                     summarize_dependencies_info_prompt)
+        summarize_dependencies_info_openai_content = summarize_dependencies_info_openai_response.choices[0].message.content
+
+        summarize_dependencies_info_content_json_list = extract_clean_json_data(summarize_dependencies_info_openai_content)
+        return summarize_dependencies_info_content_json_list
+
+
+    def create_frd(self, cobol_project_description):
+        # this clean should be removed probably
+        # documents_split_txt = self.clean_documents_split(documents_split_txt)
+        frd_prompt = self.prompt_template_creator.get_frd_prompt(cobol_project_description)
+        print("frd_prompt "+frd_prompt)
+        frd_openai_response = self.model.send_prompt(SYSTEM_MSG_COBOL_EXPERT_V1,frd_prompt)
+        frd_openai_content = frd_openai_response.choices[0].message.content
+        return frd_openai_content

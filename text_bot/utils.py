@@ -8,6 +8,49 @@ from langchain.document_loaders import TextLoader
 from pathlib import Path
 import time
 import functools
+import datetime
+
+
+def convert_json_string_to_dict(json_string):
+    """
+    Convert a JSON string to a Python dictionary.
+
+    Parameters:
+    json_string (str): The JSON string to convert.
+
+    Returns:
+    dict: The converted Python dictionary.
+    """
+    try:
+        data = json.loads(json_string)
+        return data
+    except json.JSONDecodeError as e:
+        print(f"An error occurred while decoding the JSON string: {e}")
+        return dict()
+
+def save_json_list_to_separated_files(json_list, file_path):
+    for i, doc in enumerate(json_list):
+        filename = f"{file_path}/document_{i + 1}.md"
+        with open(filename, 'w') as file:
+            file.write(doc.strip())
+
+def save_json_to_file(data, filename):
+    """
+    Save JSON data to a file.
+
+    Parameters:
+    data (dict): The JSON data to save.
+    filename (str): The name of the file to save the data to.
+    """
+    try:
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        # Append the timestamp to the filename
+        filename_with_timestamp = f"{filename}_{timestamp}.json"
+        with open(filename_with_timestamp, 'w') as file:
+            json.dump(data, file, indent=4)
+        print(f"Data successfully saved to {filename}")
+    except IOError as e:
+        print(f"An error occurred while saving the file: {e}")
 
 
 def load_file_content(file_path):
@@ -20,6 +63,24 @@ def load_file_content(file_path):
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
             return file.read()
+    except FileNotFoundError:
+        print(f"The file {file_path} was not found.")
+        return None
+    except OSError as e:
+        print(f"An error occurred: {e}")
+        return None
+
+
+def load_file_json_content(file_path):
+    """
+    Load the content of the given file path as a string.
+
+    :param file_path: The full path to the file to be read.
+    :return: A string containing the contents of the file.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return json.load(file)
     except FileNotFoundError:
         print(f"The file {file_path} was not found.")
         return None

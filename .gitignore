@@ -117,6 +117,7 @@ venv.bak/
 
 docker_image/
 log_files/
+json_export/
 
 # Sublime Text # 
 *.tmlanguage.cache 

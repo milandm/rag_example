@@ -22,10 +22,20 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - neo4j
     env_file:
       - .env
 
+  neo4j:
+    image: neo4j:latest
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4jdata:/data
+    environment:
+      - NEO4J_AUTH=neo4j/neo4jpassword
+
 volumes:
   pgdata:
-
-
+  neo4jdata:

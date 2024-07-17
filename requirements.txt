@@ -173,3 +173,4 @@ weasel==0.3.4
 whitenoise==6.5.0
 wrapt==1.16.0
 xmltodict==0.13.0
+neo4j
