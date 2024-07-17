@@ -12,7 +12,7 @@ services:
       - ./add_pgvector.sh:/docker-entrypoint-initdb.d/10-add-pgvector.sh
 
   app:
-    image: cobol-code-migration-image-app:latest
+    image: rag-example-image-app:latest
     build:
       context: .
       dockerfile: ./Dockerfile
