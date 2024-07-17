@@ -433,9 +433,504 @@ Answer:"""
 # what is this split related to? many contexts
 
 
-DOCUMENT_SYSTEM_MSG_SEMANTIC_TEXT_CHUNKING_V1 = """
+SYSTEM_MSG_COBOL_EXPERT_V1 = """
 You are COBOL programming language expert.
 """
+
+FRD_V1 = """
+For given COBOL project module description in json format:
+
+COBOL_project_module_description: $cobol_project_description
+
+You should provide a Functional Specification Document based on the provided COBOL_project_module_description.
+
+Functional Specification Document Creation Instructions:
+
+You should create a Functional Specification Document based on the provided COBOL code explanation. 
+This document should encapsulate: 
+ - the functionality, 
+ - logic 
+ - internal interactions
+ - external relations with external systems, subroutines, and modules
+ 
+This document should include outline the steps to generate the corresponding Java code for the main program logic.
+
+You should find these fields in COBOL_project_module_description:
+
+
+    - BUSSINES LOGIC DESCRIPTION
+    - BUSSINES LOGIC FEATURES LIST
+    - FUNCTIONAL LOGIC DESCRIPTION
+    - FUNCTIONAL LOGIC FEATURES LIST
+    - variables list - name and description
+    - errors edge cases list - description
+    - dependencies list - name, description, input/output variables
+    - declaratives - description
+    - CHILD_NODES_BUSSINES_LOGIC_SUMMARIZATION - lower layers connected nodes summarized bussines logic description,
+    - CHILD_NODES_FUNCTIONAL_LOGIC_SUMMARIZATION - lower layers connected nodes summarized functional logic description,
+    - DEPENDENCY_NODES_BUSSINES_LOGIC_SUMMARIZATION - dependencies summarized bussines logic description,
+    - DEPENDENCY_NODES_FUNCTIONAL_LOGIC_SUMMARIZATION - dependencies summarized functional logic description
+    - GENERAL_INPUT_AND_OUTPUT_VARIABLES_LIST - inputs that should be given and outputs that we expect for this module, enlisted and explained
+    - OVERALL_WORK_FLOW - overall workflow considering dependencies
+    - variables_list - list of all variables used with names and descriptions
+    - errors_edge_cases_list - list of all errors and edge cases covered by code implementation 
+    - declaratives - additional error and edge cases covered
+    - dependencies_list - all dependencies explained
+  
+
+Your document should include:
+
+- title - "Functional Specification for:" give here brief description that fits in standard title
+- subtitle -A descriptive subtitle and introduction to the functionality, one sentecne at most.
+- external_calls - A section explaining each external call, its purpose, and how it integrates.
+- internal_calls -A section detailing each code chunk call, including why and how the main block interacts with it.
+- variables - A description of the variables, their roles, and their scopes.
+- logic_flow - A comprehensive walkthrough of the logic flow, including conditionals, loops, any error handling, and overall program structure.
+- overall_summarization - A conclusion summarizing the place and purpose of this module within the larger application.
+
+Desired Outcome:
+
+A well-structured and professional Functional Specification Document.
+The length should be sufficient to cover all the details but concise enough to avoid redundancy — typically ranging between 3-5 pages.
+The format should be clear and organized, with headings, subheadings, bullet points, and diagrams (if necessary) to enhance readability.
+The style should be formal and technical, suitable for a developer audience who may later use this document to recreate the logic in Java.
+
+Example Output Format:
+
+Title: 
+Subtitle:
+
+Introduction:
+ Overview of this module purpose and high-level functionality.
+
+External Calls:
+ - ExternalCall1: Description and integration detail.
+ - ExternalCall2: Description and integration detail.
+
+Internal Calls:
+ - InternalCall1: Description and interaction detail.
+ - InternalCall2: Description and interaction detail.
+
+Variable Declarations:
+ - Variable1: Description and usage.
+ - Variable2: Description and usage.
+
+Logic Flow:
+ Step-by-step walkthrough of this module logic.
+
+Java Code Generation Steps Section:
+
+Detail the process of translating this module logic into Java, including:
+
+    Suggested architecture for modern Java app.
+    Mapping of COBOL data types to Java data types.
+    Conversion of COBOL specific structures to Java constructs.
+    Handling file operations and database access in Java.
+    Recommendations for replicating COBOL program cycle in Java (if applicable).
+
+Conclusion:
+ Summary of this module functionality and its relevance to the larger system.
+
+Appendices:
+ (If applicable, include any additional relevant diagrams, tables, or references.)
+
+What to Ensure:
+
+The document MUST reflect the provided COBOL project description accurately.
+Technical terms should be used appropriately.
+All assumptions about the external environment should be stated.
+Cross-referencing within the document for variable usage and call flows is encouraged for clarity.
+Clear, step-by-step instructions for the Java code generation.
+Please proceed with the creation of the Functional Specification Document as per the instructions and details provided above.
+
+"""
+
+ADD_DEPENDENCIES_SUMMARIZATION_V1 = """
+From this COBOL code information extraction:
+
+$current_cobol_code_extraction prepared 
+
+And dependencies extractions:
+
+Children description list:
+
+$children_description_extraction_list:
+
+
+Dependencies description list:
+
+$dependencies_description_extraction_list:
+
+
+Extract information below:
+
+CHILD_NODES_BUSSINES_LOGIC_SUMMARIZATION - lower layers connected nodes summarized bussines logic description,
+CHILD_NODES_FUNCTIONAL_LOGIC_SUMMARIZATION - lower layers connected nodes summarized functional logic description,
+
+
+DEPENDENCY_NODES_BUSSINES_LOGIC_SUMMARIZATION - dependencies summarized bussines logic description,
+DEPENDENCY_NODES_FUNCTIONAL_LOGIC_SUMMARIZATION - dependencies summarized functional logic description
+
+GENERAL_INPUT_AND_OUTPUT_VARIABLES_LIST - inputs that should be given and outputs that we expect for this module, enlisted and explained
+
+OVERALL_WORK_FLOW - overall workflow considering dependencies
+
+Output should look like this:    
+
+
+{
+      "CHILD_NODES_BUSSINES_LOGIC_SUMMARIZATION": "",
+      "CHILD_NODES_FUNCTIONAL_LOGIC_SUMMARIZATION": "",
+      "DEPENDENCY_NODES_BUSSINES_LOGIC_SUMMARIZATION": "",
+      "DEPENDENCY_NODES_FUNCTIONAL_LOGIC_SUMMARIZATION": "",
+      "GENERAL_INPUT_AND_OUTPUT_VARIABLES_LIST": ""
+      "OVERALL_WORK_FLOW": ""
+"""
+
+
+
+COBOL_IDENTIFICATION_DIVISION_V1 = """
+From this COBOL code block:
+
+$cobol_code
+
+Extract information below:
+
+IDENTIFICATION DIVISION: [extract all releavnt IDENTIFICATION DIVISION  info and enlist all subdivisions with its values]
+    usual subsections:
+    PROGRAM-ID: [extract PROGRAM ID]
+    program name: [extract program name]
+    author: [export author]
+    please check if there more subsections for IDENTIFICATION DIVISION and export all releavnt info and enlist all subdivisions with its values.
+
+Output should look like this:
+
+"identification_division": {
+  "general_info": "",
+  "program_id": "",
+  "program_name": "",
+  "author": ""
+}
+
+"""
+
+COBOL_ENVIRONMENT_DIVISION_V1 = """
+From this COBOL code block:
+
+$cobol_code
+
+Extract information below:
+
+
+ENVIRONMENT DIVISION: [extract all releavnt ENVIRONMENT DIVISION info and enlist all subdivisions with its values]
+    usual subsections:
+    CONFIGURATION SECTION: [extract all releavnt CONFIGURATION SECTION info and enlist all subdivisions with its values]
+    INPUT-OUTPUT SECTION: [extract all releavnt INPUT-OUTPUT SECTION info and enlist all subdivisions with its values]
+        FILE-CONTROL: [extract all releavnt FILE-CONTROL info and enlist all subdivisions with its values, file names and variables]
+        I-O-CONTROL: [extract all releavnt I-O-CONTROL info and enlist all subdivisions with its values and all variables]
+        please check if there more subsections for ENVIRONMENT DIVISION and export all releavnt info and enlist all subdivisions with its values.
+
+
+
+Output should look like this:
+
+"environment_division": {
+  "general_info": "",
+  "configuration_section": "",
+  "input_output_section": {
+    "general_info": "",
+    "file_control": "",
+    "io_control": "",
+    "variables_list": [],
+    "filenames_list": []
+  }
+"""
+
+COBOL_DATA_DIVISION_V1 = """      
+From this COBOL code block:
+
+$cobol_code
+
+Extract information below:
+
+
+DATA DIVISION: [extract all releavnt DATA DIVISION info and enlist all subdivisions with its values]
+    usual subsections:
+    FILE SECTION: [extract all releavnt FILE SECTION info and enlist all subdivisions with its values]
+        FD: [extract value (File Description) entry provides the details about the file, including its name and record structure.]
+        LABEL RECORDS ARE STANDARD: [extract value Indicates that standard label records are used.]
+        BLOCK CONTAINS 0 RECORDS: [extract value Specifies the number of records in each block. A value of 0 means no blocking.]
+        RECORD CONTAINS 80 CHARACTERS: [extract value Specifies the length of each record.]
+        DATA RECORD IS INPUT-RECORD: [extract value Associates the file with the record description (INPUT-RECORD).]
+        01: [Level Records The 01 level defines the record structure within the file.]
+            Level Fields: [extract fields Define individual fields within the record.]
+
+    WORKING-STORAGE SECTION: [extract all releavnt WORKING-STORAGE SECTION info and enlist all subdivisions with its values]
+
+    WORKING-STORAGE VARIABLES: [extract all WORKING-STORAGE variables list with variables names and explanation]
+    LOCAL-STORAGE SECTION: [extract all releavnt LOCAL-STORAGE SECTION info and enlist all subdivisions with its values]
+    LOCAL-STORAGE VARIABLES: [extract all LOCAL-STORAGE variables list with variables names and explanation]
+    LINKAGE SECTION: [extract all releavnt LINKAGE SECTION info and enlist all subdivisions with its values]
+    LINKAGE SECTION VARIABLES: [extract and enlist all variables with its name and explanation]
+    COMMUNICATION SECTION: [extract all releavnt COMMUNICATION SECTION info and enlist all subdivisions with its values]
+        LENGTH: [extract value The length of the message.]
+        STATUS: [extract value A status variable to hold the result of communication operations.]
+        QUEUE: [extract value The name of the queue used for communication.]
+        MESSAGE-STATUS: [extract value A variable to store the status code after sending or receiving a message.]
+        QUEUE-NAME: [extract value The name of the queue to which messages are sent or from which messages are received.]
+        MESSAGE-AREA: [extract value The area in memory where the message content is stored.]
+    REPORT SECTION: [extract all releavnt REPORT SECTION info and enlist all subdivisions with its values]
+
+        RD: [(Report Description) Entry]
+            PAGE LIMIT 60 LINES: [extract value Specifies the number of lines per page.]
+            FIRST DETAIL 10: [extract value The first detail line starts at line 10.]
+            LAST DETAIL 50: [extract value The last detail line ends at line 50.]
+            CONTROLS ARE DEPARTMENT: [extract value Indicates that the report is controlled by the DEPARTMENT field.]
+
+        01: [Level Report Group]
+            TYPE PAGE HEADING: [extract value Defines the layout for the page heading.]
+            TYPE DETAIL: [extract value Defines the layout for the detail lines.]
+            TYPE SUMMARY: [extract value Defines the layout for summary lines at the end of the report.]
+
+    SCREEN SECTION: [extract all releavnt SCREEN SECTION info and enlist all subdivisions with its values]
+
+        BLANK SCREEN: [extract value Clears the screen before displaying new content.]
+        LINE and COLUMN: [extract value Specifies the position of text and fields on the screen.]
+        VALUE: [extract value Displays a static text on the screen.]
+        PIC and USING: [extract all input fields and variables.]
+
+    please check if there more subsections for DATA DIVISION and export all releavnt info and enlist all subdivisions with its values.
+
+
+Output should look like this:
+
+
+"data_division": {
+  "general_info": "",
+  "file_section": {
+    "fd": "",
+    "label_records_are_standard": "",
+    "block_contains_0_records": "",
+    "record_contains_80_characters": "",
+    "data_record_is_input_record": "",
+    "01": []
+  },
+  "working_storage_section": {
+    "general_info": "",
+    "working_storage_variables_list": [
+      {
+        "variable_name": "",
+        "variable_type": "",
+        "variable_explanation": "",
+        "variable_init_value": ""
+      }...
+    ]
+  },
+  "local_storage_section": {
+    "general_info": "",
+    "local_storage_variables_list": [
+      {
+        "variable_name": "",
+        "variable_type": "",
+        "variable_explanation": "",
+        "variable_init_value": ""
+      }...
+    ]
+  },
+  "linkage_section": {
+    "general_info": "",
+    "linkage_variables_list": [
+      {
+        "variable_name": "",
+        "variable_type": "",
+        "variable_explanation": "",
+        "variable_init_value": ""
+      }...
+    ]
+  },
+  "communication_section": {
+    "general_info": "",
+    "length": "",
+    "status": "",
+    "queue": "",
+    "message_status": "",
+    "queue_name": "",
+    "message_area": ""
+  },
+  "report_section": {
+    "rd": {
+      "page_limit_60_lines": "",
+      "first_detail_10": "",
+      "last_detail_50": "",
+      "controls_are_department": ""
+    },
+    "01": {
+      "type_page_heading": "",
+      "type_detail": "",
+      "type_summary": ""
+    }
+  },
+  "screen_section": {
+    "blank_screen": "",
+    "line_and_column": "",
+    "value": "",
+    "pic_and_using": []
+  }
+}
+"""
+
+COBOL_PROCEDURE_DIVISION_V1 = """
+From this COBOL code block:
+
+PROVIDED_COBOL_CODE: $cobol_code 
+
+Extract information below:
+
+If PROVIDED_COBOL_CODE doesnt contain all the info, it is !!!MANDATORY!!! to provide info that are contained!!!
+
+-DEV_COMMENTS - [please extract all already existing comments in code one by one as list],
+-BUSSINES_LOGIC_DESCRIPTION - [general description of what this code is used for regarding bussines logic],
+-BUSSINES_LOGIC_FEATURES_LIST - [list of features implemented by this code section regarding bussines logic],
+-FUNCTIONAL_LOGIC_DESCRIPTION - [general description of what this code is doing regarding functional logic],
+-FUNCTIONAL_LOGIC_FEATURES_LIST - [list of all functionalities implemented by this code section from tech perspective],
+-WORK_FLOW - [Step-by-step walkthrough of this module logic and external calls logic]
+
+-VARIABLES_LIST - [list of all variables used in this code]
+        VARIABLE should contain these info: 
+        - NAME - [original variable name],
+        - DEFINITION - [list of any of these values that explain variable (internal, external, input, output, implicit, explicit, global, local)]    
+        - DESCRIPTION - [variables description],
+        - ADAPTED_NAME - [please provide meaningfull and explainatory name for this variable],
+        - DATA_STRUCTURE_OR_TYPE - [data structures or type of this variable]
+        - VARIABLE_INIT_VALUE - value that variable is initialised with
+
+-DEPENDENCIES_LIST - [list of all dependencies, external sections, paragraphs and procedures called from this code],
+        DEPENDENCIES should contain these info:
+        DEPENDENCY_NAME - [name of paragraph, or procedure, or section performed or called from this code block]
+        DEPENDENCY_VARIABLES - [list of all input or output variables passed during this dependency call or perform]
+        DEPENDENCY_TYPE - [internal or external]
+
+-ERRORS_EDGE_CASES_LIST - [list of all code errors and edge cases]    
+    ERROR_EDGE_CASE should contain:
+    - CODE - [code that implements this error or edge case handling]
+    - DESCRIPTION - [description of error edge case]
+    - HANDLING - [description of handling process ]
+
+DECLARATIVES: [extract all releavnt DECLARATIVES info and enlist all subdivisions with its values
+declaratives types:
+    ERROR-HANDLING SECTION: [A section named for handling errors.]
+    USE AFTER STANDARD ERROR PROCEDURE ON INPUT-FILE: [Specifies that the code in ERROR-PARA should be executed after a standard error on INPUT-FILE.]
+    ERROR-PARA:[ A paragraph that handles the error by displaying a message, performing termination steps, and stopping the program.]]
+
+If PROVIDED_COBOL_CODE doesnt contain all the info, it is !!!MANDATORY!!! to provide info that are contained!!!
+
+Output should look like this:    
+
+"procedure_division": {
+  "general_info": "",
+  "procedures_list": [
+    {
+      "DEV_COMMENTS": "",
+      "BUSSINES_LOGIC_DESCRIPTION": "",
+      "BUSSINES_LOGIC_FEATURES_LIST": "",
+      "FUNCTIONAL_LOGIC_DESCRIPTION": "",
+      "FUNCTIONAL_LOGIC_FEATURES_LIST": "",
+      "WORK_FLOW": "",
+      "variables_list": [
+        {
+          "NAME": "",
+          "DEFINITION": "",
+          "DESCRIPTION": "",
+          "ADAPTED_NAME": "",
+          "DATA_STRUCTURE_OR_TYPE": "",
+          "VARIABLE_INIT_VALUE":""
+        },
+        ...
+      ],
+      "errors_edge_cases_list": [
+        {
+          "CODE": "",
+          "DESCRIPTION": "",
+          "HANDLING": ""
+        },
+        ...
+      ],
+      "dependencies_list": [
+        {
+          "dependency_name": "",
+          "dependency_variables": [
+            {
+              "NAME": "",
+              "DEFINITION": "",
+              "DESCRIPTION": "",
+              "ADAPTED_NAME": "",
+              "DATA_STRUCTURE_OR_TYPE": "",
+              "DEPENDENCY_TYPE":""
+            },
+            ...
+          ]
+        },
+        ...
+      ],
+      "declaratives": [
+        {
+          "code_implementation": "",
+          "explanation": "",
+          "declarative_type": ""
+        },
+        ...
+      ]
+    },
+    ...
+  ]
+}
+"""
+
+COBOL_DIVISION_V1 = """
+
+for this COBOL DIVISION: cobol_division
+and this COBOL SECTION: cobol_section
+
+extract all the most important information related to 
+business logic
+functional logic - what is this part of code used for 
+variables
+extract some very important informtions about this part of code implementation
+
+
+-NAME - COBOL code referent name of this structure chunk   
+-TYPE - COBOL code structure chunk type  
+-CODE- original source code where we extracted the rest of info from
+-DEV_COMMENTS - already existing comments in code,
+-BUSSINES_LOGIC_DESCRIPTION - bussines logic general description,
+-BUSSINES_LOGIC_FEATURES_LIST - list of features implemented by this code section from bussines perspective,
+-FUNCTIONAL_LOGIC_DESCRIPTION -functional logic general description,
+-FUNCTIONAL_LOGIC_FEATURES_LIST - list of functionalities implemented by this code section from tech perspective,
+-EDGE_CASES_LIST - list of edge cases explanations, covered in this COBOL code chunk implementation,
+-ERROR_HANDLING_LIST - error handling covered by cobol code chunk,
+-CHILD_AND_DEPENDENCY_NODES_BUSSINES_LOGIC_SUMMARIZATION - lower layers connected nodes and dependencies summarized bussines logic description,
+-CHILD_AND_DEPENDENCY_NODES_FUNCTIONAL_LOGIC_SUMMARIZATION - lower layers connected nodes and dependencies summarized functional logic description,
+- list of all dependencies added as references
+- list of all variables added as references
+- list of all inputs and outputs added as references
+- list of all code subsections added as references
+podsetnik - list of all code chunks variables exchange  and connections, same data sources access, db etc
+ 
+VARIABLE_NODE
+reference to parent node - internal, external, input, output, implicit, explicit
+
+    - NAME - original variable name,
+    - DESCRIPTION - internal variables list description,
+    - ADAPTED_NAME - internal variables meaningfull and explainatory names mapping, cammel case,
+    - DATA_STRUCTURE_OR_TYPE - internal variables map of used data structures and types
+    
+DATA_STRUCTURE_NODE
+    - FIELDS_LIST - field names list
+    - FIELDS_TYPES_LIST - field types list
+    - FIELDS_DESCRIPTION_LIST - field description list
+    - FIELD_ADAPTED_NAME_LIST - field adapted names list"""
+
+
 
 COBOL_FILE_CONTENT_LISTING_EXTRACTION_TEMPLATE_V1 = """
 For this given cobol file content : 
@@ -1481,8 +1976,34 @@ class CobolExtractionPromptTemplateCreator:
                                             previous_response=previous_response)
         return user_prompt
 
-    def get_extract_cobol_code_chunks_prompt(self, new_code_chunk, last_previous_code_section) -> str:
+    def get_extract_cobol_code_chunk_prompt(self, new_code_chunk, last_previous_code_section) -> str:
         code_chunk = new_code_chunk + " " + last_previous_code_section
         user_prompt = self.prepare_template(COBOL_FILE_CONTENT_EXTRACTION_TEMPLATE_V1,
                                             cobol_code=code_chunk)
+        return user_prompt
+
+    def get_extract_cobol_code_chunk_info_prompt(self, division_name, code_chunk) -> str:
+        user_prompt = ""
+        if "IDENTIFICATION" in division_name:
+            user_prompt = self.prepare_template(COBOL_IDENTIFICATION_DIVISION_V1,cobol_code=code_chunk)
+        elif  "ENVIRONMENT" in division_name:
+            user_prompt = self.prepare_template(COBOL_ENVIRONMENT_DIVISION_V1, cobol_code=code_chunk)
+        elif "DATA" in division_name:
+            user_prompt = self.prepare_template(COBOL_DATA_DIVISION_V1, cobol_code=code_chunk)
+        elif "PROCEDURE" in division_name:
+            user_prompt = self.prepare_template(COBOL_PROCEDURE_DIVISION_V1, cobol_code=code_chunk)
+        return user_prompt
+
+
+    def get_summarize_dependencies_info_prompt(self, current_cobol_code_extraction,
+                                               children_description_extraction_list,
+                                               dependencies_description_extraction_list) -> str:
+        user_prompt = self.prepare_template(ADD_DEPENDENCIES_SUMMARIZATION_V1,
+                                                    current_cobol_code_extraction=current_cobol_code_extraction,
+                                                    children_description_extraction_list=children_description_extraction_list,
+                                                    dependencies_description_extraction_list=dependencies_description_extraction_list)
+        return user_prompt
+
+    def get_frd_prompt(self, cobol_project_description) -> str:
+        user_prompt = self.prepare_template(FRD_V1,cobol_project_description=cobol_project_description)
         return user_prompt
