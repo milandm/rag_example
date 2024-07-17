@@ -13,6 +13,28 @@ RUN apt-get update && apt-get install -y \
 # Copy the current directory contents into the container at /app
 COPY . /app
 
+FROM postgres:latest
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    postgresql-server-dev-all \
+    build-essential
+
+# Clone and install pgvector
+RUN git clone --branch v0.7.2 https://github.com/pgvector/pgvector.git \
+    && cd pgvector \
+    && make \
+    && make install
+
+# Clean up
+RUN apt-get remove --purge -y \
+    git \
+    postgresql-server-dev-all \
+    build-essential \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/* /pgvector
+
 # Upgrade pip
 RUN pip install --upgrade pip
 

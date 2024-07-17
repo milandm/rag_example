@@ -62,7 +62,7 @@ class VectorizeDocumentsEngine:
             self.add_document_splits(documents_splits)
 
     def load_semantic_document_chunks_to_db(self):
-        documents = load_documents("documents/")
+        documents = load_documents("documents_to_vectorize/")
         for document_pages in documents:
 
             document_page_formatted_list = self.get_document_split_pages(document_pages)

@@ -19,5 +19,13 @@ export POSTGRES_PASSWORD=$DB_PASSWORD
 # Add the pgvector extension
 psql -h $DB_HOST -U $DB_USERNAME -d $DB_NAME -c "CREATE EXTENSION IF NOT EXISTS vector;"
 
+##!/bin/bash
+#set -e
+#
+## Create the pgvector extension
+#psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+#    CREATE EXTENSION IF NOT EXISTS vector;
+#EOSQL
+
 # Unset the PGPASSWORD variable
 unset PGPASSWORD
