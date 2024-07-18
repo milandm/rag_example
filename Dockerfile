@@ -13,9 +13,12 @@ RUN apt-get update && apt-get install -y \
 # Copy your application files
 COPY . .
 
+COPY requirements.txt /app/
 # Upgrade pip and install Python dependencies
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
+
+COPY . /app/
 
 # Second stage: PostgreSQL environment setup
 FROM postgres:latest as postgres-build
