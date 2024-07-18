@@ -14,6 +14,7 @@ fi
 
 # Export the PGPASSWORD variable so that psql does not prompt for password
 export PGPASSWORD=$DB_PASSWORD
+export POSTGRES_USER=$DB_USER
 export POSTGRES_PASSWORD=$DB_PASSWORD
 
 ## Add the pgvector extension
