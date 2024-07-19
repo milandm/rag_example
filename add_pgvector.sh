@@ -17,20 +17,20 @@ export PGPASSWORD=$DB_PASSWORD
 export POSTGRES_USER=$DB_USER
 export POSTGRES_PASSWORD=$DB_PASSWORD
 
-## Add the pgvector extension
-#psql -h $DB_HOST -U $DB_USERNAME -d $DB_NAME -c "CREATE EXTENSION IF NOT EXISTS vector;"
+# Add the pgvector extension
+psql -h $DB_HOST -U $DB_USERNAME -d $DB_NAME -c "CREATE EXTENSION IF NOT EXISTS vector;"
 
 #!/bin/bash
-set -e
-
-echo "Running add_pgvector.sh script"
-
-# Create the pgvector extension
-psql -v ON_ERROR_STOP=1 --username "$DB_USERNAME" --dbname "$DB_NAME" <<-EOSQL
-    CREATE EXTENSION IF NOT EXISTS vector;
-EOSQL
-
-echo "pgvector extension created"
+#set -e
+#
+#echo "Running add_pgvector.sh script"
+#
+## Create the pgvector extension
+#psql -v ON_ERROR_STOP=1 --username "$DB_USERNAME" --dbname "$DB_NAME" <<-EOSQL
+#    CREATE EXTENSION IF NOT EXISTS vector;
+#EOSQL
+#
+#echo "pgvector extension created"
 
 #set -e
 #
