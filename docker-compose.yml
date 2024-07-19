@@ -1,6 +1,6 @@
 services:
   db:
-    image: ankane/pgvector
+    image: ramsrib/pgvector:16
     env_file:
       - .env
     ports:
