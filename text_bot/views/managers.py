@@ -110,12 +110,12 @@ class CTDocumentSectionManager(models.Manager):
         section_content_summary = semantic_section_json.get("section_content_summary", "")
         section_references = semantic_section_json.get("section_references", "")
         section_topics = semantic_section_json.get("section_topics", "")
-        section_number = semantic_section_json["section_number"]
-        title_embedding = semantic_section_json["title_embedding"]
-        text_embedding = semantic_section_json["text_embedding"]
-        content_summary_embedding = semantic_section_json["content_summary_embedding"]
-        references_embedding = semantic_section_json["references_embedding"]
-        topics_embedding = semantic_section_json["topics_embedding"]
+        section_number = semantic_section_json.get("section_number", 0)
+        title_embedding = semantic_section_json.get("title_embedding", "")
+        text_embedding = semantic_section_json.get("text_embedding", "")
+        content_summary_embedding = semantic_section_json.get("content_summary_embedding", "")
+        references_embedding = semantic_section_json.get("references_embedding", "")
+        topics_embedding = semantic_section_json.get("topics_embedding", "")
 
         ct_document_section = self.create(
             ct_document=ct_document,

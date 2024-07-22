@@ -18,7 +18,7 @@ from typing import List, Callable
 import numpy as np
 from text_bot.utils import retry
 
-EMBEDDING_MODEL = "text-embedding-ada-003"
+EMBEDDING_MODEL = "text-embedding-3-large"
 # LLM_MODEL = "gpt-3.5-turbo"
 # LLM_MODEL = "gpt-4"
 LLM_MODEL ="gpt-4o"

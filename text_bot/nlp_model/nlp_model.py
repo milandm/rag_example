@@ -4,8 +4,8 @@ from numpy import ndarray
 
 class NlpModel(ABC):
 
-    VECTOR_PARAMS_SIZE = 384
-    # VECTOR_PARAMS_SIZE = 1536
+    # VECTOR_PARAMS_SIZE = 384
+    VECTOR_PARAMS_SIZE = 1536
 
     @abstractmethod
     def get_embeddings(self, sentences: Union[str, List[str]]) -> ndarray:
