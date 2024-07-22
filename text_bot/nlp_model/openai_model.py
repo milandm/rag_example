@@ -18,7 +18,7 @@ from typing import List, Callable
 import numpy as np
 from text_bot.utils import retry
 
-EMBEDDING_MODEL = "text-embedding-3-large"
+EMBEDDING_MODEL = "text-embedding-3-small"
 # LLM_MODEL = "gpt-3.5-turbo"
 # LLM_MODEL = "gpt-4"
 LLM_MODEL ="gpt-4o"
@@ -32,6 +32,7 @@ MAX_TOKENS = 4096
 class OpenaiModel(NlpModel):
 
     VECTOR_PARAMS_SIZE = 1536
+    # VECTOR_PARAMS_SIZE = 3072
 
     def __init__(self):
 

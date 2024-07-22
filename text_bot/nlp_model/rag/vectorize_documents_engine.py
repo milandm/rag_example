@@ -21,7 +21,8 @@ from text_bot.views.models import CTDocument, \
     CTDocumentSubsectionTitle,\
     CTDocumentSubsectionText,\
     CTDocumentSubsectionReferences,\
-    CTDocumentSubsectionTopics
+    CTDocumentSubsectionTopics,\
+    QuotesDocuments
 
 
 from text_bot.nlp_model.rag.prompt_creator import PromptCreator
@@ -172,7 +173,9 @@ class VectorizeDocumentsEngine:
         for i, documents_split in enumerate(documents_splits):
             # document_page = documents_split.metadata.get("page", 0)
             split_text = documents_split.page_content
-            ct_document_section = CTDocumentSection.objects.create_from_json({"section_text":split_text}, ct_document, document_page_idx)
+            embedding = self.model.get_embedding(split_text)
+            ct_document_section = QuotesDocuments.objects.create(section_text_value = split_text,
+                                               text_embedding = embedding)
 
         return documents_splits[-1]
 
