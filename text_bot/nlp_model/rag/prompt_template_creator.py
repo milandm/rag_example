@@ -529,7 +529,7 @@ Output should look like this:
 
 
 DOCUMENT_SYSTEM_MSG_QUESTION_STATEMENT_V1 = """
-You are expert for clinical trial research and you should check if given response is correct.
+You are psychologist and wise man and you should find best motivational quotes to support users current psychological state.
 """
 
 QUESTION_STATEMENT_PROMPT_TEMPLATE_V1 = """
@@ -540,6 +540,13 @@ $question
 
 THREE_QUESTION_STATEMENTS_PROMPT_TEMPLATE_V1= """
 Formulate given question as a statement in three different ways. 
+Export json list of strings:
+
+QUESTION: $question 
+"""
+
+THREE_QUESTION_STATEMENTS_PROMPT_TEMPLATE_V2= """
+Formulate given question or statement as a statement in three different ways. 
 Export json list of strings:
 
 QUESTION: $question 
@@ -625,6 +632,25 @@ PLease check if this ANSWER contains all information requested by QUESTION.
 
 """
 
+QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V3 = """
+PSYCHOLOGICAL_STATE: $psychological_state
+SECTION_TEXT: $section_text
+
+From given SECTION_TEXT extract only MOTIVATIONAL!!! quotes related to explained PSYCHOLOGICAL_STATE.
+    1. It is mandatory to keep any related enlisted items!!!
+    2. Highest priority is to preserve all key information and entities in the text. 
+    3. Enlist with bullet points all important items related to question!!!
+    4. Quotes should be exactly the same as given in SECTION_TEXT!!!
+
+If there is no any related information, please always answer with this answer:
+NO RELEVANT INFO    
+
+```
+ANSWER:  <all related info text>
+```
+PLease check if this ANSWER contains all MOTIVATIONAL quotes related to explained PSYCHOLOGICAL_STATE.
+
+"""
 
 
 # ```json
@@ -747,11 +773,11 @@ class PromptTemplateCreator:
         return user_prompt
 
     def get_three_question_statements(self, question: str) -> str:
-        user_prompt = self.prepare_template(THREE_QUESTION_STATEMENTS_PROMPT_TEMPLATE_V1, question=question)
+        user_prompt = self.prepare_template(THREE_QUESTION_STATEMENTS_PROMPT_TEMPLATE_V2, question=question)
         return user_prompt
 
     def get_question_related_information(self, question: str, section_text: str) -> str:
-        user_prompt = self.prepare_template(QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V1,
+        user_prompt = self.prepare_template(QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V3,
                                             question=question,
                                             section_text=section_text)
         return user_prompt

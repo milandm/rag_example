@@ -13,7 +13,8 @@ SENTENCE_MIN_LENGTH = 2
 from text_bot.views.models import (CTDocumentSection,
                                    CTDocumentSubsection,
                                    CTDocumentSectionText,
-                                   CTDocumentSubsectionText)
+                                   CTDocumentSubsectionText,
+                                   QuotesDocuments)
 
 from text_bot.nlp_model.rag.prompt_creator import PromptCreator
 
@@ -74,19 +75,10 @@ class ChatManager:
 
         sections_dict = dict()
         for question_statement_embedded in embedded_three_question_statements_list:
-            sections = CTDocumentSection.objects.query_embedding_in_db(question_statement_embedded)
-            subsections = CTDocumentSubsection.objects.query_embedding_in_db(question_statement_embedded)
-            section_full_texts = CTDocumentSectionText.objects.query_embedding_in_db(question_statement_embedded)
-            subsection_full_texts = CTDocumentSubsectionText.objects.query_embedding_in_db(question_statement_embedded)
+            quotes_documents = QuotesDocuments.objects.query_embedding_in_db(question_statement_embedded)
 
-            for section in sections:
-                sections_dict[section.ct_document.id] = section.section_text_value
-            for subsection in subsections:
-                sections_dict[subsection.ct_document_section.ct_document.id] = subsection.ct_document_section.section_text_value
-            for section in section_full_texts:
-                sections_dict[section.ct_document_section.ct_document.id] = section.section_text
-            for subsection in subsection_full_texts:
-                sections_dict[subsection.ct_document_subsection.ct_document_section.ct_document.id] = subsection.ct_document_subsection.ct_document_section.section_text_value
+            for quotes_document in quotes_documents:
+                sections_dict[quotes_document.id] = quotes_document.section_text_value
 
         sections_list = list()
         for key, section_text in sections_dict.items():
