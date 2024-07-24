@@ -137,10 +137,10 @@ class CTDocumentSectionManager(models.Manager):
         return ct_document_section
 
     def query_embedding_in_db(self, embedding):
-        return self.order_by(CosineDistance('content_summary_embedding', embedding)).all()[:20]
+        return self.order_by(CosineDistance('text_embedding', embedding)).all()[:20]
 
     def query_embedding_by_distance(self, embedding):
-        cosine_distance=CosineDistance('content_summary_embedding', embedding)
+        cosine_distance=CosineDistance('text_embedding', embedding)
         return self.annotate(cosine_distance=cosine_distance)\
             .filter(cosine_distance__lt=COSINE_DISTANCE_TRESHOLD)
         # return self.alias(cosine_distance=cosine_distance)\
