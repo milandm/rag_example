@@ -104,6 +104,7 @@ class PublicTextBotAPIView(GenericViewSet):
         chat_manager = ChatManager(OpenaiModel())
 
         input = request.query_params.get('input', '')
+        print("input"+input)
         # history_key = request.query_params.get('history_key', '')
 
         response = chat_manager.send_user_query(input)

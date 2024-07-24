@@ -66,6 +66,7 @@ class PromptCreator:
 
     def get_question_related_informations(self, psychological_state: str, section_text):
         question_related_information_prompt = self.prompt_template_creator.get_question_related_information(psychological_state, section_text)
+        print("get_question_related_informations question_related_information_prompt: " + question_related_information_prompt)
         question_related_information_openai_response = \
             self.model.send_prompt(DOCUMENT_SYSTEM_MSG_QUESTION_RELATED_INFORMATION_V1, question_related_information_prompt)
         print(str(question_related_information_openai_response))

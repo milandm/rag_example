@@ -636,17 +636,18 @@ QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V3 = """
 PSYCHOLOGICAL_STATE: $psychological_state
 SECTION_TEXT: $section_text
 
-From given SECTION_TEXT extract only MOTIVATIONAL!!! quotes related to explained PSYCHOLOGICAL_STATE.
-    1. It is mandatory to keep any related enlisted items!!!
-    2. Highest priority is to preserve all key information and entities in the text. 
-    3. Enlist with bullet points all important items related to question!!!
-    4. Quotes should be exactly the same as given in SECTION_TEXT!!!
+From given SECTION_TEXT extract !!!MAXIMUM 3!!! !!!MOTIVATIONAL QUOTES!!! which are best to support person facing explained PSYCHOLOGICAL_STATE.
+    1. Dont give any additional explanation, just enlist related quotes
+    1. Enlist with bullet points all motivational quotes related to given PSYCHOLOGICAL_STATE!!!
+    2. Quotes should be exactly the same as given in SECTION_TEXT!!!
+
+ANSWER should be formatted as json list.
 
 If there is no any related information, please always answer with this answer:
 NO RELEVANT INFO    
 
 ```
-ANSWER:  <all related info text>
+ANSWER:  <motivational quotes json list>
 ```
 PLease check if this ANSWER contains all MOTIVATIONAL quotes related to explained PSYCHOLOGICAL_STATE.
 
@@ -776,9 +777,9 @@ class PromptTemplateCreator:
         user_prompt = self.prepare_template(THREE_QUESTION_STATEMENTS_PROMPT_TEMPLATE_V2, question=question)
         return user_prompt
 
-    def get_question_related_information(self, question: str, section_text: str) -> str:
+    def get_question_related_information(self, psychological_state: str, section_text: str) -> str:
         user_prompt = self.prepare_template(QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V3,
-                                            question=question,
+                                            psychological_state=psychological_state,
                                             section_text=section_text)
         return user_prompt
 
