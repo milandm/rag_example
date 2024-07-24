@@ -646,9 +646,13 @@ ANSWER should be formatted as json list.
 If there is no any related information, please always answer with this answer:
 NO RELEVANT INFO    
 
-```
-ANSWER:  <motivational quotes json list>
-```
+Output should look like this:
+ANSWER: [
+    {"some quote": "quote source"},
+    {"some quote": "quote source"},
+    {"some quote": "quote source"},
+]
+
 PLease check if this ANSWER contains all MOTIVATIONAL quotes related to explained PSYCHOLOGICAL_STATE.
 
 """
