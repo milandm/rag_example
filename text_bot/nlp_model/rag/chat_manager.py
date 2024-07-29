@@ -7,6 +7,9 @@ import json
 from text_bot.nlp_model.nlp_model import NlpModel
 from text_bot.ai_utils import token_count_from_string
 
+import re
+
+
 # SENTENCE_MIN_LENGTH = 15
 SENTENCE_MIN_LENGTH = 2
 
@@ -88,15 +91,29 @@ class ChatManager:
         concatenated_section_list =  self.concatenate_prompt_input_list(sections_list)
 
         question_related_info_list = list()
-        for section_text in concatenated_section_list:
+        for section_text in concatenated_section_list[:1]:
             print("concatenated_section_list section_text: " + section_text)
             question_related_info = self.prompt_creator.get_question_related_informations(current_query, section_text)
             question_related_info_list.append(question_related_info)
 
-        json_data = json.dumps(question_related_info_list)
-        return json_data
+        # json_data = json.dumps(question_related_info_list)
+        return question_related_info_list
         # documents_list = list(documents)
         # doc_for_prompt = get_mmr_cosine_sorted_docs(query_embedding, documents)
+
+
+    def format_answer(self, json_data: str) -> str:
+        print("json_first_answer: " + str(json_data))
+        formated_answer = ""
+        for quote_dicts  in json_data:
+            quote_dicts = json.loads(quote_dicts)
+            print("json_first_answer: " + str(quote_dicts))
+            for quote_dict in quote_dicts:
+                for quote, author in quote_dict.items():
+                    formated_answer=formated_answer+quote+"\n"
+                    formated_answer = formated_answer + author + "\n"
+        return formated_answer
+
 
     def concatenate_prompt_input_list(self, prompt_input_list):
         new_prompt_input_list = list()
