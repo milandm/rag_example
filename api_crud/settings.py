@@ -96,6 +96,7 @@ ROOT_URLCONF = 'api_crud.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        # 'DIRS': [os.path.join(BASE_DIR, 'text_bot/templates')],
         'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {

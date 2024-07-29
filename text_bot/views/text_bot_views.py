@@ -24,6 +24,13 @@ from text_bot.nlp_model.openai_model import OpenaiModel
 from text_bot.nlp_model.text_extraction.extraction_manager import ExtractionManager
 from text_bot.nlp_model.llama_model import LLamaModel
 
+from django.shortcuts import render
+
+
+def chatbot_demo(request):
+    return render(request, 'rag_example/chat_bot.html')
+
+
 class TopChatsView(GenericViewSet):
 
     serializer_class = ChatQuestion

@@ -641,19 +641,38 @@ From given SECTION_TEXT extract !!!MAXIMUM 3!!! !!!MOTIVATIONAL QUOTES!!! which 
     1. Enlist with bullet points all motivational quotes related to given PSYCHOLOGICAL_STATE!!!
     2. Quotes should be exactly the same as given in SECTION_TEXT!!!
 
+If there is no any related information, please always answer with this answer:
+NO RELEVANT INFO    
+
+Output should be json look like this:
+[{"some quote": "quote source"},
+    {"some quote": "quote source"},
+    {"some quote": "quote source"}]
+
+"""
+
+QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V4 = """
+PSYCHOLOGICAL_STATE: $psychological_state
+SECTION_TEXT: $section_text
+
+From given SECTION_TEXT extract !!!MAXIMUM 3!!! !!!MOTIVATIONAL QUOTES!!! which are best to support person facing explained PSYCHOLOGICAL_STATE.
+    1. Dont give any additional explanation, just enlist related quotes
+    1. Enlist with bullet points all motivational quotes related to given PSYCHOLOGICAL_STATE!!!
+    2. Quotes should be exactly the same as given in SECTION_TEXT!!!
+
 ANSWER should be formatted as json list.
 
 If there is no any related information, please always answer with this answer:
 NO RELEVANT INFO    
 
+PLease check if this ANSWER contains all MOTIVATIONAL quotes related to explained PSYCHOLOGICAL_STATE.
+
 Output should look like this:
 ANSWER: [
     {"some quote": "quote source"},
     {"some quote": "quote source"},
-    {"some quote": "quote source"},
+    {"some quote": "quote source"}
 ]
-
-PLease check if this ANSWER contains all MOTIVATIONAL quotes related to explained PSYCHOLOGICAL_STATE.
 
 """
 

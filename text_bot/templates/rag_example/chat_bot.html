@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot Demo</title>
+</head>
+<body>
+    <h1>Chatbot Demo</h1>
+    <form id="chat-form">
+        <label for="message">Message:</label>
+        <input type="text" name="message" id="message" autocomplete="off">
+        <button type="submit">Send</button>
+    </form>
+    <div id="chat-log"></div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#chat-form').submit(function(event) {
+                event.preventDefault();
+                const message = $('#message').val();
+                $.ajax({
+                    url: '/api/v1/textbot/public-chat',  // Update this URL to match your API endpoint
+                    method: 'GET',
+                    data: { input: message },
+                    success: function(data) {
+                        $('#chat-log').append('<p><strong>You:</strong> ' + message + '</p>');
+                        $('#chat-log').append('<p><strong>Bot:</strong> ' + data + '</p>');
+                        $('#message').val('');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
