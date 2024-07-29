@@ -104,14 +104,17 @@ class ChatManager:
 
     def format_answer(self, json_data: str) -> str:
         print("json_first_answer: " + str(json_data))
-        formated_answer = ""
-        for quote_dicts  in json_data:
-            quote_dicts = json.loads(quote_dicts)
-            print("json_first_answer: " + str(quote_dicts))
-            for quote_dict in quote_dicts:
-                for quote, author in quote_dict.items():
-                    formated_answer=formated_answer+quote+"\n"
-                    formated_answer = formated_answer + author + "\n"
+        formated_answer = json_data
+        try:
+            for quote_dicts  in json_data:
+                quote_dicts = json.loads(quote_dicts)
+                print("json_first_answer: " + str(quote_dicts))
+                for quote_dict in quote_dicts:
+                    for quote, author in quote_dict.items():
+                        formated_answer=formated_answer+quote+"\n"
+                        formated_answer = formated_answer + author + "\n"
+        except Exception as e:
+            print(str(e))
         return formated_answer
 
 
