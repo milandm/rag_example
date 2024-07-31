@@ -104,18 +104,52 @@ class ChatManager:
 
     def format_answer(self, json_data: str) -> str:
         print("json_first_answer: " + str(json_data))
-        formated_answer = json_data
+        json_first_element = None
+        if json_data and isinstance(json_data, list):
+            json_first_element = json_data[0]
+        print("json_first_element: " + str(json_first_element))
+        if json_first_element and isinstance(json_first_element, str):
+            json_data = json.loads(self.extract_inner_list(json_first_element))
+        print("extract_inner_list: " + str(json_data))
+        formated_answer = ""
         try:
-            for quote_dicts  in json_data:
-                quote_dicts = json.loads(quote_dicts)
+            for quote_dicts in json_data:
+                # if quote_dicts and isinstance(quote_dicts, str):
+                #     quote_dicts = json.loads(quote_dicts)
                 print("json_first_answer: " + str(quote_dicts))
                 for quote_dict in quote_dicts:
+                    if quote_dict and not isinstance(quote_dict, dict):
+                        quote_dict = json.loads(quote_dict)
                     for quote, author in quote_dict.items():
                         formated_answer=formated_answer+quote+"\n"
                         formated_answer = formated_answer + author + "\n"
         except Exception as e:
             print(str(e))
+        if not formated_answer:
+            formated_answer = str(json_data)
         return formated_answer
+
+    def extract_inner_list(self, json_data):
+        # Find the first occurrence of '[' and the last occurrence of ']'
+        start_index = json_data.find('[')
+        end_index = json_data.rfind(']')
+
+        if start_index == -1 or end_index == -1 or start_index >= end_index:
+            print("No valid list found in the string.")
+            return None
+
+        # Extract the substring between the found indices
+        inner_list_str = json_data[start_index:end_index + 1]
+
+        inner_start_index = inner_list_str.find('[')
+        inner_end_index = inner_list_str.rfind(']')
+
+        if inner_start_index == -1 or inner_end_index == -1 or inner_start_index >= inner_end_index:
+            print("No valid list found in the string.")
+            return inner_list_str
+        else:
+            inner_list_str = inner_list_str[inner_start_index:inner_end_index + 1]
+            return inner_list_str
 
 
     def concatenate_prompt_input_list(self, prompt_input_list):
