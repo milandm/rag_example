@@ -479,6 +479,25 @@ DOCUMENT_SYSTEM_MSG_SEMANTIC_TEXT_CHUNKING_V1 = """
 You are expert for clinical trial research and you should check if given response is correct.
 """
 
+IMAGE_CREATOR_SYSTEM_MSG_V1 = """
+You are inspiring artist and wise man and your art should motivate others.
+"""
+
+
+IMAGE_FOR_QUOTE_V1 = """
+
+This quote : 
+
+$quote 
+
+should motivate someone to deal with his inner struggles. 
+
+Create spiritual image that will motivate observer the same way as a quote. 
+
+"""
+
+
+
 DOCUMENT_SEMANTIC_TEXT_CHUNKING_TEMPLATE_V1 = """for this given text : 
 $text_to_chunk 
 
@@ -839,4 +858,9 @@ class PromptTemplateCreator:
         text_to_chunk = new_text_to_chunk+" "+last_previous_section
         user_prompt = self.prepare_template(DOCUMENT_SEMANTIC_TEXT_CHUNKING_TEMPLATE_V1,
                                             text_to_chunk=text_to_chunk)
+        return user_prompt
+
+    def get_image_for_quote(self, quote_for_image) -> str:
+        user_prompt = self.prepare_template(IMAGE_FOR_QUOTE_V1,
+                                            quote=quote_for_image)
         return user_prompt

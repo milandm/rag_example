@@ -6,6 +6,8 @@ import json
 
 from text_bot.nlp_model.nlp_model import NlpModel
 from text_bot.ai_utils import token_count_from_string
+from text_bot.nlp_model.mml_model import MmlModel
+
 
 import re
 
@@ -20,6 +22,8 @@ from text_bot.views.models import (CTDocumentSection,
                                    QuotesDocuments)
 
 from text_bot.nlp_model.rag.prompt_creator import PromptCreator
+from custom_logger.universal_logger import UniversalLogger
+
 
 MAX_TOKEN_CHUNK_SIZE = 2000
 MAX_CHUNK_SIZE = 1000
@@ -28,49 +32,51 @@ MAX_PAGE_SIZE = 5500
 
 class ChatManager:
 
-    def __init__(self, nlp_model :NlpModel):
+    def __init__(self, nlp_model :NlpModel, mml_model :MmlModel):
+        self.logger = UniversalLogger('./log_files/app.log', max_bytes=1048576, backup_count=3)
         self.model = nlp_model
-        self.prompt_creator = PromptCreator(nlp_model)
+        self.mml_model = mml_model
+        self.prompt_creator = PromptCreator(nlp_model, mml_model)
 
     # def send_user_query(self, current_query: str, history_key:str = "") -> dict:
-    #     print(" ")
-    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
-    #     print("current_query "+current_query)
-    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
-    #     print(" ")
+    #     self.logger.info(" ")
+    #     self.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
+    #     self.logger.info("current_query "+current_query)
+    #     self.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
+    #     self.logger.info(" ")
     #     # get_chat_history = self.get_chat_history(history_key)
     #     query_embedding = self.model.get_embedding(current_query)
     #     documents = CTDocumentSplit.objects.query_embedding_by_distance(query_embedding)
     #     documents_list = list(documents)
     #     doc_for_prompt = get_mmr_cosine_sorted_docs(query_embedding, documents)
     #
-    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
-    #     print("not ranked ")
-    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
-    #     print(" ")
+    #     self.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
+    #     self.logger.info("not ranked ")
+    #     self.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
+    #     self.logger.info(" ")
     #     for doc in documents:
-    #         print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
-    #         print(doc.split_text)
-    #         print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
+    #         self.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
+    #         self.logger.info(doc.split_text)
+    #         self.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
     #
-    #     print(" ")
-    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
-    #     print("ranked ")
-    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
-    #     print(" ")
+    #     self.logger.info(" ")
+    #     self.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
+    #     self.logger.info("ranked ")
+    #     self.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
+    #     self.logger.info(" ")
     #     for doc in doc_for_prompt:
-    #         print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
-    #         print(doc.split_text)
-    #         print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
+    #         self.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
+    #         self.logger.info(doc.split_text)
+    #         self.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
     #     # self.prompt_creator.get_answer(query_embedding, doc_for_prompt)
 
 
     def send_user_query(self, current_query: str) -> dict:
-        print(" ")
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
-        print("current_query "+current_query)
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
-        print(" ")
+        self.logger.info(" ")
+        self.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
+        self.logger.info("current_query "+current_query)
+        self.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ")
+        self.logger.info(" ")
 
         three_question_statements_list = self.prompt_creator.get_three_question_statements(current_query)
 
@@ -85,14 +91,14 @@ class ChatManager:
 
         sections_list = list()
         for key, section_text in sections_dict.items():
-            print("sections_dict section_text: "+section_text)
+            self.logger.info("sections_dict section_text: "+section_text)
             sections_list.append(section_text)
 
         concatenated_section_list =  self.concatenate_prompt_input_list(sections_list)
 
         question_related_info_list = list()
         for section_text in concatenated_section_list[:1]:
-            print("concatenated_section_list section_text: " + section_text)
+            self.logger.info("concatenated_section_list section_text: " + section_text)
             question_related_info = self.prompt_creator.get_question_related_informations(current_query, section_text)
             question_related_info_list.append(question_related_info)
 
@@ -103,20 +109,21 @@ class ChatManager:
 
 
     def format_answer(self, json_data: str) -> str:
-        print("json_first_answer: " + str(json_data))
+        self.logger.info("format_answer json_data type: " + str(type(json_data)))
+        self.logger.info("json_first_answer: " + str(json_data))
         json_first_element = None
         if json_data and isinstance(json_data, list):
             json_first_element = json_data[0]
-        print("json_first_element: " + str(json_first_element))
+        self.logger.info("json_first_element: " + str(json_first_element))
         if json_first_element and isinstance(json_first_element, str):
             json_data = json.loads(self.extract_inner_list(json_first_element))
-        print("extract_inner_list: " + str(json_data))
+        self.logger.info("extract_inner_list: " + str(json_data))
         formated_answer = ""
         try:
             for quote_dicts in json_data:
                 # if quote_dicts and isinstance(quote_dicts, str):
                 #     quote_dicts = json.loads(quote_dicts)
-                print("json_first_answer: " + str(quote_dicts))
+                self.logger.info("json_first_answer: " + str(quote_dicts))
                 for quote_dict in quote_dicts:
                     if quote_dict and not isinstance(quote_dict, dict):
                         quote_dict = json.loads(quote_dict)
@@ -124,9 +131,10 @@ class ChatManager:
                         formated_answer=formated_answer+quote+"\n"
                         formated_answer = formated_answer + author + "\n"
         except Exception as e:
-            print(str(e))
+            self.logger.info(str(e))
         if not formated_answer:
             formated_answer = str(json_data)
+        self.logger.info("format_answer formated_answer type: " + str(type(formated_answer)))
         return formated_answer
 
     def extract_inner_list(self, json_data):
@@ -135,7 +143,7 @@ class ChatManager:
         end_index = json_data.rfind(']')
 
         if start_index == -1 or end_index == -1 or start_index >= end_index:
-            print("No valid list found in the string.")
+            self.logger.info("No valid list found in the string.")
             return None
 
         # Extract the substring between the found indices
@@ -145,7 +153,7 @@ class ChatManager:
         inner_end_index = inner_list_str.rfind(']')
 
         if inner_start_index == -1 or inner_end_index == -1 or inner_start_index >= inner_end_index:
-            print("No valid list found in the string.")
+            self.logger.info("No valid list found in the string.")
             return inner_list_str
         else:
             inner_list_str = inner_list_str[inner_start_index:inner_end_index + 1]
@@ -174,6 +182,10 @@ class ChatManager:
             return text_split_compression
         else:
             return text_split_compression_check
+
+    def get_image(self, response):
+        return self.prompt_creator.get_image_for_quote(response[0])
+
 
 
     def get_chat_history(self, history_key: str) -> dict:

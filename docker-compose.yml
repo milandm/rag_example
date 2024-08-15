@@ -26,6 +26,7 @@ services:
       - .:/app
     ports:
       - "8000:8000"
+      - "5678:5678"
     links:
       - db:db
     depends_on:
@@ -35,6 +36,8 @@ services:
       - .env
     networks:
       - djangonetwork
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   neo4j:
     image: neo4j:latest
@@ -55,5 +58,6 @@ volumes:
 networks:
   djangonetwork:
     driver: bridge
+
 #  default:
 #    name: my_network

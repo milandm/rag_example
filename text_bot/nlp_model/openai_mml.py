@@ -2,7 +2,7 @@ import openai
 from openai import OpenAI
 
 from typing import Union, Generator, Any
-from text_bot.nlp_model.nlp_model import NlpModel
+from text_bot.nlp_model.mml_model import MmlModel
 
 from text_bot.nlp_model.config import (
     OPENAI_API_KEY,
@@ -33,7 +33,7 @@ IMAGE_QUALITY = "standard"
 MAX_TOKENS = 4096
 # MAX_TOKENS = 1024
 
-class OpenaiModel(NlpModel):
+class OpenaiMml(MmlModel):
 
     VECTOR_PARAMS_SIZE = 1536
     # VECTOR_PARAMS_SIZE = 3072
@@ -51,22 +51,15 @@ class OpenaiModel(NlpModel):
     def get_embedding(self, text):
         return self.open_ai_embeddings.embed_query(text)
 
-    @retry(max_retries=3, initial_delay=1, backoff=2)
-    def send_prompt( self, system_msg:str, user_prompt:str ):
-
-        response = openai.chat.completions.create(
-            # model="gpt-3.5-turbo",
-            model=LLM_MODEL,
-            messages=[{"role": "system", "content": system_msg},
-                       {"role": "user", "content": user_prompt}],
-            max_tokens = MAX_TOKENS,
-            temperature=0,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0
+    def generate_image(self, image_description_prompt):
+        response = openai.images.generate(
+            model=IMAGE_MODEL,
+            prompt=image_description_prompt,
+            size=IMAGE_SIZE,
+            quality=IMAGE_QUALITY,
+            n=1,
         )
         return response
-
 
     def get_embeddings(self, sentences: List[str]) -> List[List[float]]:
         return self.open_ai_embeddings.embed_documents(sentences)

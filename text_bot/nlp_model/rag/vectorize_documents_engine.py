@@ -26,6 +26,7 @@ from text_bot.views.models import CTDocument, \
 
 
 from text_bot.nlp_model.rag.prompt_creator import PromptCreator
+from text_bot.nlp_model.mml_model import MmlModel
 
 MAX_CHUNK_SIZE = 500
 MAX_CHUNK_OVERLAP_SIZE = 250
@@ -41,9 +42,9 @@ HEADERS_TO_SPLIT_ON = [
 class VectorizeDocumentsEngine:
 
 
-    def __init__(self, nlp_model :NlpModel):
+    def __init__(self, nlp_model :NlpModel, mml_model:MmlModel):
         self.model = nlp_model
-        self.prompt_creator = PromptCreator(nlp_model)
+        self.prompt_creator = PromptCreator(nlp_model, mml_model)
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=MAX_CHUNK_SIZE, chunk_overlap=MAX_CHUNK_OVERLAP_SIZE)
         self.recursive_text_splitter = RecursiveCharacterTextSplitter(chunk_size=MAX_SEMANTIC_CHUNK_SIZE, chunk_overlap=MAX_SEMANTIC_CHUNK_OVERLAP_SIZE)
         self.pages_splitter = RecursiveCharacterTextSplitter(chunk_size=MAX_PAGE_SIZE, chunk_overlap=0)

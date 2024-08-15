@@ -23,6 +23,7 @@ from text_bot.nlp_model.rag.chat_manager import ChatManager
 from text_bot.nlp_model.openai_model import OpenaiModel
 from text_bot.nlp_model.text_extraction.extraction_manager import ExtractionManager
 from text_bot.nlp_model.llama_model import LLamaModel
+from text_bot.nlp_model.openai_mml import OpenaiMml
 
 from django.shortcuts import render
 
@@ -108,20 +109,25 @@ class PublicTextBotAPIView(GenericViewSet):
     def get_chat_response(self, request: Request):
         print(request.META)
 
-        chat_manager = ChatManager(OpenaiModel())
+        chat_manager = ChatManager(OpenaiModel(), OpenaiMml())
 
         input = request.query_params.get('input', '')
         print("input"+input)
         # history_key = request.query_params.get('history_key', '')
 
-        response = chat_manager.send_user_query(input)
-        response = chat_manager.format_answer(response)
+        response_list = chat_manager.send_user_query(input)
+        formated_response_list = chat_manager.format_answer(response_list)
+        image_url = chat_manager.get_image(formated_response_list)
 
-        if response:
-            return Response(response)  # return the data in the DRF Response
+        response_dict = dict()
+        response_dict["image_url"] = image_url
+        response_dict["quotes"] = formated_response_list
+
+        if response_dict:
+            return Response(str(response_dict))  # return the data in the DRF Response
         else:
             print("Your request failed")
-            return Response(response.json(), status=response.status_code)
+            return Response(response_list.json(), status=response_list.status_code)
 
 
 

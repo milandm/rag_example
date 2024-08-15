@@ -5,6 +5,7 @@ sys.path.append("..")
 import json
 
 from text_bot.nlp_model.nlp_model import NlpModel
+from text_bot.nlp_model.mml_model import MmlModel
 from text_bot.utils import remove_quotes, extract_single_value_openai_content, extract_clean_json_data
 
 # SENTENCE_MIN_LENGTH = 15
@@ -19,13 +20,15 @@ from text_bot.nlp_model.rag.prompt_template_creator import \
     DOCUMENT_SYSTEM_MSG_COMPRESSION_CHECK_V1, \
     DOCUMENT_SYSTEM_MSG_SEMANTIC_TEXT_CHUNKING_V1, \
     DOCUMENT_SYSTEM_MSG_QUESTION_STATEMENT_V1, \
-    DOCUMENT_SYSTEM_MSG_QUESTION_RELATED_INFORMATION_V1
+    DOCUMENT_SYSTEM_MSG_QUESTION_RELATED_INFORMATION_V1, \
+    IMAGE_CREATOR_SYSTEM_MSG_V1
 
 
 class PromptCreator:
 
-    def __init__(self, nlp_model: NlpModel):
+    def __init__(self, nlp_model: NlpModel, mml_model: MmlModel):
         self.model = nlp_model
+        self.mml_model = mml_model
         self.prompt_template_creator = PromptTemplateCreator()
 
 
@@ -110,3 +113,10 @@ class PromptCreator:
 
         semantic_text_chunks_content_json_list = extract_clean_json_data(semantic_text_chunks_content)
         return semantic_text_chunks_content_json_list
+
+    def get_image_for_quote(self, quote_for_image: str):
+        quote_for_image_prompt = self.prompt_template_creator.get_image_for_quote(quote_for_image)
+        quote_for_image_openai_response = self.mml_model.generate_image(quote_for_image_prompt)
+        print(str(quote_for_image_openai_response))
+        image_url = quote_for_image_openai_response.data[0].url
+        return image_url
