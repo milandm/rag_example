@@ -135,6 +135,7 @@ class ChatManager:
         if not formated_answer:
             formated_answer = str(json_data)
         self.logger.info("format_answer formated_answer type: " + str(type(formated_answer)))
+        # formated_answer = json.dumps(formated_answer)
         return formated_answer
 
     def extract_inner_list(self, json_data):

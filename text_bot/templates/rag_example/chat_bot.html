@@ -1,59 +1,154 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Chatbot Demo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Demo</title>
     <style>
-        #chat-form {
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
             display: flex;
             flex-direction: column;
-            width: 100%;
-            max-width: 500px;
-            margin: auto;
+            height: 100vh;
         }
-        #chat-form label {
-            font-size: 1.2em;
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            max-width: 600px;
+            margin: auto;
+            width: 100%;
+        }
+        #chat-log {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 10px;
+        }
+        #chat-log p {
+            margin: 10px 0;
+        }
+        #chat-log img {
+            max-width: 100%;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        #chat-form {
+            display: flex;
+            width: 100%;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
         }
         #message {
-            width: 100%;
+            flex: 1;
             padding: 10px;
-            font-size: 1.2em;
-            margin-bottom: 10px;
+            font-size: 1.1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
             box-sizing: border-box;
+            width: calc(100% - 80px);
         }
         #chat-form button {
-            padding: 10px;
-            font-size: 1.2em;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
+            width: 60px;
+        }
+        #chat-form button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <h1>Chatbot Demo</h1>
+
+<div id="chat-container">
+    <div id="chat-log"></div>
     <form id="chat-form">
-        <label for="message">Message:</label>
-        <input type="text" name="message" id="message" autocomplete="off">
+        <input type="text" name="message" id="message" placeholder="Type your message..." autocomplete="off" required>
         <button type="submit">Send</button>
     </form>
-    <div id="chat-log"></div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('#chat-form').submit(function(event) {
-                event.preventDefault();
-                const message = $('#message').val();
-                $.ajax({
-                    url: '/api/v1/textbot/public-chat',  // Update this URL to match your API endpoint
-                    method: 'GET',
-                    data: { input: message },
-                    success: function(data) {
-                        $('#chat-log').append('<p><strong>You:</strong> ' + message + '</p>');
-                        $('#chat-log').append('<p><strong>Bot:</strong> ' + data + '</p>');
-                        $('#message').val('');
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#chat-form').submit(function(event) {
+            event.preventDefault();
+            const message = $('#message').val();
+
+            console.log('User message:', message);
+
+            // Append user's message to chat log
+            $('#chat-log').append('<p><strong>You:</strong> ' + message + '</p>');
+            $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
+
+            $.ajax({
+                url: '/api/v1/textbot/public-chat',  // Update this URL to match your API endpoint
+                method: 'GET',
+                data: { input: message },
+                success: function(response) {
+                    console.log('Raw response from server:', response);
+
+                    // Since the response is already a valid object, no need to parse it as JSON
+                    const data = response;
+
+                    console.log('Parsed response:', data);
+
+                    // Append bot's image response if present
+                    if (data.image_url) {
+                        console.log('Image URL:', data.image_url);
+                        $('#chat-log').append('<p><strong>Bot:</strong></p>');
+                        $('#chat-log').append('<img src="' + data.image_url + '" alt="Generated Image">');
                     }
-                });
+
+                    // Append bot's quotes response if present
+                    if (data.quotes) {
+                        try {
+                            const quotes = JSON.parse(data.quotes.replace(/'/g, '"'));
+                            console.log('Parsed quotes:', quotes);
+
+                            $('#chat-log').append('<p><strong>Bot:</strong></p>');
+                            quotes.forEach(quote => {
+                                for (const [text, author] of Object.entries(quote)) {
+                                    $('#chat-log').append('<p>"' + text + '" - ' + author + '</p>');
+                                }
+                            });
+                        } catch (error) {
+                            console.error('Error parsing quotes:', error);
+                            $('#chat-log').append('<p><strong>Error:</strong> Failed to parse quotes.</p>');
+                        }
+                    }
+
+                    // Scroll chat log to the bottom after receiving response
+                    $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
+
+                    // Clear the message input
+                    $('#message').val('');
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error:', status, error);
+                    $('#chat-log').append('<p><strong>Error:</strong> Unable to retrieve response</p>');
+                    $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
+                }
             });
         });
-    </script>
+    });
+</script>
+
+
 </body>
 </html>

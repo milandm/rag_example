@@ -24,6 +24,7 @@ from text_bot.nlp_model.openai_model import OpenaiModel
 from text_bot.nlp_model.text_extraction.extraction_manager import ExtractionManager
 from text_bot.nlp_model.llama_model import LLamaModel
 from text_bot.nlp_model.openai_mml import OpenaiMml
+from django.http import JsonResponse
 
 from django.shortcuts import render
 
@@ -123,11 +124,14 @@ class PublicTextBotAPIView(GenericViewSet):
         response_dict["image_url"] = image_url
         response_dict["quotes"] = formated_response_list
 
-        if response_dict:
-            return Response(str(response_dict))  # return the data in the DRF Response
+        response = response_dict
+        # response = JsonResponse(response_dict)
+
+        if response:
+            return Response(response)  # return the data in the DRF Response
         else:
             print("Your request failed")
-            return Response(response_list.json(), status=response_list.status_code)
+            return Response(response.json(), status=response.status_code)
 
 
 
