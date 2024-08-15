@@ -103,68 +103,69 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
-    $('#chat-form').submit(function(event) {
-        event.preventDefault();
-        const message = $('#message').val();
+        $('#chat-form').submit(function(event) {
+            event.preventDefault();
+            const message = $('#message').val();
 
-        console.log('User message:', message);
+            console.log('User message:', message);
 
-        // Append user's message to chat log
-        $('#chat-log').append('<p><strong>You:</strong> ' + message + '</p>');
-        $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
+            // Append user's message to chat log
+            $('#chat-log').append('<p><strong>You:</strong> ' + message + '</p>');
+            $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
 
-        $.ajax({
-            url: '/api/v1/textbot/public-chat',  // Update this URL to match your API endpoint
-            method: 'GET',
-            data: { input: message },
-            success: function(response) {
-                console.log('Raw response from server:', response);
+            $.ajax({
+                url: '/api/v1/textbot/public-chat',  // Update this URL to match your API endpoint
+                method: 'GET',
+                data: { input: message },
+                success: function(response) {
+                    console.log('Raw response from server:', response);
 
-                const data = response;
+                    const data = response;
 
-                console.log('Parsed response:', data);
+                    console.log('Parsed response:', data);
 
-                if (data.image_url) {
-                    console.log('Image URL:', data.image_url);
-                    $('#chat-log').append('<p><strong>Bot:</strong></p>');
-                    const imageContainer = $('<div class="image-container"></div>');
-                    const imgElement = $('<img src="' + data.image_url + '" alt="Generated Image">');
-                    const quoteOverlay = $('<div class="quote-overlay"></div>');
-                    imageContainer.append(imgElement);
-                    imageContainer.append(quoteOverlay);
-                    $('#chat-log').append(imageContainer);
+                    if (data.image_url) {
+                        console.log('Image URL:', data.image_url);
+                        $('#chat-log').append('<p><strong>Bot:</strong></p>');
+                        const imageContainer = $('<div class="image-container"></div>');
+                        const imgElement = $('<img src="' + data.image_url + '" alt="Generated Image">');
+                        const quoteOverlay = $('<div class="quote-overlay"></div>');
+                        imageContainer.append(imgElement);
+                        imageContainer.append(quoteOverlay);
+                        $('#chat-log').append(imageContainer);
 
-                    // Display the first quote on the image
-                    if (data.quotes) {
-                        try {
-                            // Replace single quotes with double quotes and parse as JSON
-                            const quotesString = data.quotes.replace(/'/g, '"');
-                            const quotes = JSON.parse(quotesString);
-                            console.log('Parsed quotes:', quotes);
+                        // Display the first quote on the image
+                        if (data.quotes) {
+                            try {
+                                // Replace single quotes with double quotes and parse as JSON
+                                const quotesString = data.quotes.replace(/'/g, '"');
+                                const quotes = JSON.parse(quotesString);
+                                console.log('Parsed quotes:', quotes);
 
-                            if (quotes.length > 0) {
-                                const firstQuote = Object.keys(quotes[0])[0];
-                                quoteOverlay.text(firstQuote);
-                                quoteOverlay.fadeIn(); // Show the quote overlay
+                                if (quotes.length > 0) {
+                                    const firstQuote = quotes[0].quote; // Access the 'quote' key directly
+                                    quoteOverlay.text(firstQuote);
+                                    quoteOverlay.fadeIn(); // Show the quote overlay
+                                }
+                            } catch (error) {
+                                console.error('Error parsing quotes:', error);
+                                $('#chat-log').append('<p><strong>Error:</strong> Failed to parse quotes.</p>');
                             }
-                        } catch (error) {
-                            console.error('Error parsing quotes:', error);
-                            $('#chat-log').append('<p><strong>Error:</strong> Failed to parse quotes.</p>');
                         }
                     }
-                }
 
-                $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
-                $('#message').val('');
-            },
-            error: function(xhr, status, error) {
-                console.log('Error:', status, error);
-                $('#chat-log').append('<p><strong>Error:</strong> Unable to retrieve response</p>');
-                $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
-            }
+                    $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
+                    $('#message').val('');
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error:', status, error);
+                    $('#chat-log').append('<p><strong>Error:</strong> Unable to retrieve response</p>');
+                    $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
+                }
+            });
         });
     });
-});
+
 </script>
 
 </body>

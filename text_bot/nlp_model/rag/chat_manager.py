@@ -138,27 +138,17 @@ class ChatManager:
         # formated_answer = json.dumps(formated_answer)
         return formated_answer
 
+
     def extract_inner_list(self, json_data):
-        # Find the first occurrence of '[' and the last occurrence of ']'
         start_index = json_data.find('[')
         end_index = json_data.rfind(']')
 
         if start_index == -1 or end_index == -1 or start_index >= end_index:
             self.logger.info("No valid list found in the string.")
-            return None
+            return json_data
 
-        # Extract the substring between the found indices
-        inner_list_str = json_data[start_index:end_index + 1]
-
-        inner_start_index = inner_list_str.find('[')
-        inner_end_index = inner_list_str.rfind(']')
-
-        if inner_start_index == -1 or inner_end_index == -1 or inner_start_index >= inner_end_index:
-            self.logger.info("No valid list found in the string.")
-            return inner_list_str
-        else:
-            inner_list_str = inner_list_str[inner_start_index:inner_end_index + 1]
-            return inner_list_str
+        # Extract and return the inner JSON list string
+        return json_data[start_index:end_index + 1]
 
 
     def concatenate_prompt_input_list(self, prompt_input_list):
