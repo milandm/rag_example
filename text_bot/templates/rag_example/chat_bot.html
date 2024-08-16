@@ -31,7 +31,6 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 10px;
-            position: relative; /* Add this line */
         }
         #chat-log p {
             margin: 10px 0;
@@ -45,7 +44,7 @@
             border-radius: 5px;
         }
         .quote-overlay {
-            font-family: 'Cursive', sans-serif; /* Use a cursive font */
+            font-family: 'Cursive', sans-serif;
             position: absolute;
             top: 50%;
             left: 50%;
@@ -107,8 +106,6 @@
             event.preventDefault();
             const message = $('#message').val();
 
-            console.log('User message:', message);
-
             // Append user's message to chat log
             $('#chat-log').append('<p><strong>You:</strong> ' + message + '</p>');
             $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
@@ -118,15 +115,9 @@
                 method: 'GET',
                 data: { input: message },
                 success: function(response) {
-                    console.log('Raw response from server:', response);
-
                     const data = response;
 
-                    console.log('Parsed response:', data);
-
                     if (data.image_url) {
-                        console.log('Image URL:', data.image_url);
-                        $('#chat-log').append('<p><strong>Bot:</strong></p>');
                         const imageContainer = $('<div class="image-container"></div>');
                         const imgElement = $('<img src="' + data.image_url + '" alt="Generated Image">');
                         const quoteOverlay = $('<div class="quote-overlay"></div>');
@@ -137,15 +128,12 @@
                         // Display the first quote on the image
                         if (data.quotes) {
                             try {
-                                // Replace single quotes with double quotes and parse as JSON
-                                const quotesString = data.quotes.replace(/'/g, '"');
-                                const quotes = JSON.parse(quotesString);
-                                console.log('Parsed quotes:', quotes);
+                                const quotes = JSON.parse(data.quotes.replace(/'/g, '"'));
 
                                 if (quotes.length > 0) {
-                                    const firstQuote = quotes[0].quote; // Access the 'quote' key directly
-                                    quoteOverlay.text(firstQuote);
-                                    quoteOverlay.fadeIn(); // Show the quote overlay
+                                    const firstQuoteText = Object.keys(quotes[0])[0];
+                                    quoteOverlay.text(firstQuoteText);
+                                    quoteOverlay.fadeIn();
                                 }
                             } catch (error) {
                                 console.error('Error parsing quotes:', error);
@@ -165,7 +153,6 @@
             });
         });
     });
-
 </script>
 
 </body>

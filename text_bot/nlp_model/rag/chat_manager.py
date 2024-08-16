@@ -127,9 +127,12 @@ class ChatManager:
                 for quote_dict in quote_dicts:
                     if quote_dict and not isinstance(quote_dict, dict):
                         quote_dict = json.loads(quote_dict)
-                    for quote, author in quote_dict.items():
-                        formated_answer=formated_answer+quote+"\n"
-                        formated_answer = formated_answer + author + "\n"
+                    if quote_dict and isinstance(quote_dict, dict):
+                        for quote, author in quote_dict.items():
+                            formated_answer=formated_answer+quote+"\n"
+                            formated_answer = formated_answer + author + "\n"
+                    else:
+                        formated_answer = quote_dict
         except Exception as e:
             self.logger.info(str(e))
         if not formated_answer:
