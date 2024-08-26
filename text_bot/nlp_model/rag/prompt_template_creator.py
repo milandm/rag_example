@@ -662,12 +662,15 @@ From given SECTION_TEXT extract !!!MAXIMUM 3!!! !!!MOTIVATIONAL QUOTES!!! which 
 
 If there is no any related information, please always answer with this answer:
 NO RELEVANT INFO    
-
-Output should be just valid json list look like this:
-[{"some quote": "quote source"},
-    {"some quote": "quote source"},
-    {"some quote": "quote source"}]
 """
+
+# Output should be just valid json list look like this:
+# {"quotes": {
+#     "some quote": "quote source",
+#     "some quote": "quote source",
+#     "some quote": "quote source"
+# }}
+
 
 QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V5 = """
 PSYCHOLOGICAL_STATE: $psychological_state

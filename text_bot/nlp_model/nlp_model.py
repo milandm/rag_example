@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Tuple, Iterable, Type, Union, Callable, Optional, Generator, Any
 from numpy import ndarray
+from pydantic import BaseModel
+
 
 class NlpModel(ABC):
 
@@ -18,4 +20,11 @@ class NlpModel(ABC):
 
     @abstractmethod
     def send_prompt( self, system_msg:str, user_prompt:str ):
+        pass
+
+
+    @abstractmethod
+    def send_prompt_structured_output(self, system_msg: str,
+                                      user_prompt: str,
+                                      structured_output_model: BaseModel):
         pass

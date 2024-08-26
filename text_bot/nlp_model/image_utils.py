@@ -6,13 +6,20 @@ from django.conf import settings
 import os
 import requests
 from django.http import HttpRequest
+import datetime
 
 
 def generate_image(request: HttpRequest, image_url, text_over_image):
 
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    # Append the timestamp to the filename
+    image_file_timestamp = f"image_{timestamp}.png"
+    image_file_with_text_timestamp  = f"image_with_text_{timestamp}.png"
+
+
     # Download and save the image locally
     image_response = requests.get(image_url)
-    image_path = os.path.join(settings.MEDIA_ROOT, "image.png")
+    image_path = os.path.join(settings.MEDIA_ROOT, image_file_timestamp)
     with open(image_path, "wb") as f:
         f.write(image_response.content)
 
@@ -24,7 +31,7 @@ def generate_image(request: HttpRequest, image_url, text_over_image):
     draw = ImageDraw.Draw(img)
 
     # Specify a font and size
-    font_size = 50 * 8
+    font_size = 50 * 4
     font_path = os.path.join(settings.BASE_DIR, 'fonts/DancingScript-Regular.ttf')
     font = ImageFont.truetype(font_path, font_size)
 
@@ -45,20 +52,12 @@ def generate_image(request: HttpRequest, image_url, text_over_image):
     # Draw white text
     draw.text(text_position, text_over_image, font=font, fill="white")
 
-
     # Save the edited image
-    edited_image_path = os.path.join(settings.MEDIA_ROOT, "image_with_text.png")
+    edited_image_path = os.path.join(settings.MEDIA_ROOT, image_file_with_text_timestamp)
     img.save(edited_image_path)
 
-    # image_url = request.build_absolute_uri(os.path.join(settings.MEDIA_URL, "image_with_text.png"))
-    # return image_url
-    #
-    # # Serve the image
-    # with open(edited_image_path, "rb") as f:
-    #     return HttpResponse(f.read(), content_type="image/png")
-
     # Construct the image URL
-    image_url = request.build_absolute_uri(os.path.join(settings.MEDIA_URL, "image_with_text.png"))
+    image_url = request.build_absolute_uri(os.path.join(settings.MEDIA_URL, image_file_with_text_timestamp))
 
     # Return the image URL
     return image_url

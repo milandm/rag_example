@@ -25,6 +25,8 @@ from text_bot.nlp_model.rag.prompt_creator import PromptCreator
 from custom_logger.universal_logger import UniversalLogger
 from text_bot.nlp_model.image_utils import generate_image
 from django.http import HttpRequest
+from text_bot.nlp_model.llm_structured_output_models.quotes_list import QuotesListModel
+
 
 
 MAX_TOKEN_CHUNK_SIZE = 2000
@@ -98,14 +100,21 @@ class ChatManager:
 
         concatenated_section_list =  self.concatenate_prompt_input_list(sections_list)
 
-        question_related_info_list = list()
-        for section_text in concatenated_section_list[:1]:
-            self.logger.info("concatenated_section_list section_text: " + section_text)
-            question_related_info = self.prompt_creator.get_question_related_informations(current_query, section_text)
-            question_related_info_list.append(question_related_info)
+        # question_related_info_list = list()
+        # for section_text in concatenated_section_list[:1]:
+        #     self.logger.info("concatenated_section_list section_text: " + section_text)
+        #     question_related_info = self.prompt_creator.get_question_related_informations_structured(current_query, section_text, QuotesListModel)
+        #     question_related_info_list.append(question_related_info)
 
+        question_related_info_list = list()
+        section_text = concatenated_section_list[0]
+        self.logger.info("concatenated_section_list section_text: " + str(section_text))
+        question_related_info = self.prompt_creator.get_question_related_informations_structured(current_query, section_text, QuotesListModel)
+        self.logger.info("open ai response: " + str(question_related_info))
         # json_data = json.dumps(question_related_info_list)
-        return question_related_info_list
+        if question_related_info:
+            return question_related_info
+        return None
         # documents_list = list(documents)
         # doc_for_prompt = get_mmr_cosine_sorted_docs(query_embedding, documents)
 
@@ -179,8 +188,9 @@ class ChatManager:
         else:
             return text_split_compression_check
 
-    def get_image(self, request: HttpRequest, open_ai_response, text_over_image):
-        return generate_image( request, self.prompt_creator.get_image_for_quote(open_ai_response[0]), text_over_image)
+    def get_image(self, request: HttpRequest, quotes_list):
+        text_over_image = list(quotes_list.keys())[0]
+        return generate_image( request, self.prompt_creator.get_image_for_quote(text_over_image), text_over_image)
 
 
 

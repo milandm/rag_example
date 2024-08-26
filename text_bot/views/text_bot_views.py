@@ -25,8 +25,9 @@ from text_bot.nlp_model.text_extraction.extraction_manager import ExtractionMana
 from text_bot.nlp_model.llama_model import LLamaModel
 from text_bot.nlp_model.openai_mml import OpenaiMml
 from django.http import JsonResponse
-
 from django.shortcuts import render
+import json
+from custom_logger.universal_logger import UniversalLogger
 
 
 def chatbot_demo(request):
@@ -108,6 +109,7 @@ class PublicTextBotAPIView(GenericViewSet):
     )
     @action(methods=["GET"], detail=True)
     def get_chat_response(self, request: Request):
+        logger = UniversalLogger('./log_files/app.log', max_bytes=1048576, backup_count=3)
         print(request.META)
 
         chat_manager = ChatManager(OpenaiModel(), OpenaiMml())
@@ -116,14 +118,27 @@ class PublicTextBotAPIView(GenericViewSet):
         print("input"+input)
         # history_key = request.query_params.get('history_key', '')
 
-        response_list = chat_manager.send_user_query(input)
-        formated_response_list = chat_manager.format_answer(response_list)
-        image_url = chat_manager.get_image(request, formated_response_list, formated_response_list[0])
+        open_ai_response = chat_manager.send_user_query(input)
+
+        open_ai_response_json = json.loads(open_ai_response)
+
+        response_dict_format = dict()
+        response_dict_format[open_ai_response_json["quote1"]] = open_ai_response_json["author1"]
+        response_dict_format[open_ai_response_json["quote2"]] = open_ai_response_json["author2"]
+        response_dict_format[open_ai_response_json["quote3"]] = open_ai_response_json["author3"]
+
+        logger.info("response_dict_format created "+ str(response_dict_format))
+        try:
+            # formated_response_list = json.loads(response_dict)
+            image_url = chat_manager.get_image(request, response_dict_format)
+        except Exception as e:
+            logger.error(e)
 
         response_dict = dict()
         response_dict["image_url"] = image_url
-        response_dict["quotes"] = formated_response_list
+        response_dict["quotes"] = response_dict_format
 
+        logger.info("response_dict created " + str(response_dict))
         response = response_dict
         # response = JsonResponse(response_dict)
 

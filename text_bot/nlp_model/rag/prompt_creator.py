@@ -23,6 +23,9 @@ from text_bot.nlp_model.rag.prompt_template_creator import \
     DOCUMENT_SYSTEM_MSG_QUESTION_RELATED_INFORMATION_V1, \
     IMAGE_CREATOR_SYSTEM_MSG_V1
 
+from custom_logger.universal_logger import UniversalLogger
+from pydantic import BaseModel
+
 
 class PromptCreator:
 
@@ -30,6 +33,7 @@ class PromptCreator:
         self.model = nlp_model
         self.mml_model = mml_model
         self.prompt_template_creator = PromptTemplateCreator()
+        self.logger = UniversalLogger('./log_files/app.log', max_bytes=1048576, backup_count=3)
 
 
     def get_document_title(self, first_documents_split_txt: str):
@@ -75,6 +79,21 @@ class PromptCreator:
         print(str(question_related_information_openai_response))
         question_related_information_content = question_related_information_openai_response.choices[0].message.content
         return question_related_information_content
+
+
+    def get_question_related_informations_structured(self, psychological_state: str, section_text, structured_output_model: BaseModel):
+        question_related_information_prompt = self.prompt_template_creator.get_question_related_information(
+            psychological_state, section_text)
+        self.logger.info(
+            "get_question_related_informations question_related_information_prompt: " + question_related_information_prompt)
+        question_related_information_openai_response = \
+            self.model.send_prompt_structured_output(DOCUMENT_SYSTEM_MSG_QUESTION_RELATED_INFORMATION_V1,
+                                   question_related_information_prompt, structured_output_model)
+
+        question_related_information_content = question_related_information_openai_response.choices[
+            0].message.content
+        return question_related_information_content
+
 
 
     def clean_documents_split(self, documents_split_txt):

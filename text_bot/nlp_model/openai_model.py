@@ -17,11 +17,16 @@ from langchain.chat_models import ChatOpenAI
 from typing import List, Callable
 import numpy as np
 from text_bot.utils import retry
+from pydantic import BaseModel
+
+
 
 EMBEDDING_MODEL = "text-embedding-3-small"
 # LLM_MODEL = "gpt-3.5-turbo"
 # LLM_MODEL = "gpt-4"
 LLM_MODEL ="gpt-4o"
+LLM_MODEL_STRUCTURED_OUTPUT = "gpt-4o-2024-08-06"
+
 
 IMAGE_MODEL = "dall-e-3"
 IMAGE_SIZE = "1024x1024"
@@ -46,6 +51,7 @@ class OpenaiModel(NlpModel):
         openai.azure_endpoint = AZURE_OPENAI_ENDPOINT
         self.llm = ChatOpenAI(temperature=0, model_name=LLM_MODEL)
         self.open_ai_embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
+        self.client = OpenAI()
 
 
     def get_embedding(self, text):
@@ -66,6 +72,19 @@ class OpenaiModel(NlpModel):
             presence_penalty=0
         )
         return response
+
+    @retry(max_retries=3, initial_delay=1, backoff=2)
+    def send_prompt_structured_output(self, system_msg: str,
+                                      user_prompt: str,
+                                      structured_output_model: BaseModel):
+        response = self.client.beta.chat.completions.parse(
+            model = LLM_MODEL_STRUCTURED_OUTPUT,
+            messages=[{"role": "system", "content": system_msg},
+                       {"role": "user", "content": user_prompt}],
+            response_format=structured_output_model,
+        )
+        return response
+
 
 
     def get_embeddings(self, sentences: List[str]) -> List[List[float]]:
