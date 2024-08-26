@@ -6,6 +6,8 @@ from drf_yasg.generators import OpenAPISchemaGenerator
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 from text_bot.views.text_bot_views import chatbot_demo
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 class CustomOpenAPISchemaGenerator(OpenAPISchemaGenerator):
@@ -48,3 +50,7 @@ urlpatterns = [
 
     path('chatbot-demo/', chatbot_demo, name='chatbot_demo'),
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

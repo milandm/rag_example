@@ -23,6 +23,8 @@ from text_bot.views.models import (CTDocumentSection,
 
 from text_bot.nlp_model.rag.prompt_creator import PromptCreator
 from custom_logger.universal_logger import UniversalLogger
+from text_bot.nlp_model.image_utils import generate_image
+from django.http import HttpRequest
 
 
 MAX_TOKEN_CHUNK_SIZE = 2000
@@ -177,8 +179,8 @@ class ChatManager:
         else:
             return text_split_compression_check
 
-    def get_image(self, response):
-        return self.prompt_creator.get_image_for_quote(response[0])
+    def get_image(self, request: HttpRequest, open_ai_response, text_over_image):
+        return generate_image( request, self.prompt_creator.get_image_for_quote(open_ai_response[0]), text_over_image)
 
 
 

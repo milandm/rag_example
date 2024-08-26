@@ -120,9 +120,7 @@
                     if (data.image_url) {
                         const imageContainer = $('<div class="image-container"></div>');
                         const imgElement = $('<img src="' + data.image_url + '" alt="Generated Image">');
-                        const quoteOverlay = $('<div class="quote-overlay"></div>');
                         imageContainer.append(imgElement);
-                        imageContainer.append(quoteOverlay);
                         $('#chat-log').append(imageContainer);
 
                         // Display the first quote on the image
@@ -132,8 +130,6 @@
 
                                 if (quotes.length > 0) {
                                     const firstQuoteText = Object.keys(quotes[0])[0];
-                                    quoteOverlay.text(firstQuoteText);
-                                    quoteOverlay.fadeIn();
                                 }
                             } catch (error) {
                                 console.error('Error parsing quotes:', error);

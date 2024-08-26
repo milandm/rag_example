@@ -359,3 +359,9 @@ SUPPORTED_IMAGE_MIMETYPES = ['image/jpeg', 'image/png', 'image/gif']
 #     from api_crud.local_settings import *
 # except ImportError:
 #     raise Exception("A local_settings.py file is required to run this project")
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+

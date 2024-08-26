@@ -118,7 +118,7 @@ class PublicTextBotAPIView(GenericViewSet):
 
         response_list = chat_manager.send_user_query(input)
         formated_response_list = chat_manager.format_answer(response_list)
-        image_url = chat_manager.get_image(formated_response_list)
+        image_url = chat_manager.get_image(request, formated_response_list, formated_response_list[0])
 
         response_dict = dict()
         response_dict["image_url"] = image_url
