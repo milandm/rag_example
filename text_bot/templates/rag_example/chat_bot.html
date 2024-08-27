@@ -43,19 +43,6 @@
             max-width: 100%;
             border-radius: 5px;
         }
-        .quote-overlay {
-            font-family: 'Cursive', sans-serif;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 1.5em;
-            text-align: center;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            pointer-events: none;
-            width: 100%;
-        }
         #chat-form {
             display: flex;
             width: 100%;
@@ -144,16 +131,6 @@
                         const imgElement = $('<img src="' + data.image_url + '" alt="Generated Image">');
                         imageContainer.append(imgElement);
                         $('#chat-log').append(imageContainer);
-
-                        // Display the first quote on the image
-                        if (data.quotes) {
-                            const quotes = data.quotes;
-                            const firstQuoteText = Object.keys(quotes)[0];
-                            const firstQuoteSource = quotes[firstQuoteText];
-
-                            const quoteOverlay = $('<div class="quote-overlay"></div>').text(firstQuoteText + ' - ' + firstQuoteSource);
-                            imageContainer.append(quoteOverlay);
-                        }
                     }
 
                     $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
