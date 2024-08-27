@@ -133,8 +133,28 @@ class PromptCreator:
         semantic_text_chunks_content_json_list = extract_clean_json_data(semantic_text_chunks_content)
         return semantic_text_chunks_content_json_list
 
+
+
+    def get_image_description(self, quote_for_image: str):
+        semantic_text_chunks_prompt = self.prompt_template_creator.get_image_description(quote_for_image)
+        semantic_text_chunk_openai_response = self.model.send_prompt(DOCUMENT_SYSTEM_MSG_QUESTION_RELATED_INFORMATION_V1,
+                                                                      semantic_text_chunks_prompt)
+        print(str(semantic_text_chunk_openai_response))
+        semantic_text_chunks_content = semantic_text_chunk_openai_response.choices[0].message.content
+        return semantic_text_chunks_content
+
+
+
     def get_image_for_quote(self, quote_for_image: str):
         quote_for_image_prompt = self.prompt_template_creator.get_image_for_quote(quote_for_image)
+        quote_for_image_openai_response = self.mml_model.generate_image(quote_for_image_prompt)
+        print(str(quote_for_image_openai_response))
+        image_url = quote_for_image_openai_response.data[0].url
+        return image_url
+
+
+    def get_image_based_on_description(self, image_description: str):
+        quote_for_image_prompt = self.prompt_template_creator.get_image_based_on_description(image_description)
         quote_for_image_openai_response = self.mml_model.generate_image(quote_for_image_prompt)
         print(str(quote_for_image_openai_response))
         image_url = quote_for_image_openai_response.data[0].url

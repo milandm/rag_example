@@ -87,12 +87,28 @@
         #chat-form button:hover {
             background-color: #0056b3;
         }
+        /* Spinner styles */
+        #spinner {
+            display: none;
+            margin: auto;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #007bff;
+            width: 24px;
+            height: 24px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
 
 <div id="chat-container">
     <div id="chat-log"></div>
+    <div id="spinner"></div> <!-- Spinner element -->
     <form id="chat-form">
         <input type="text" name="message" id="message" placeholder="Type your message..." autocomplete="off" required>
         <button type="submit">Send</button>
@@ -110,11 +126,17 @@
             $('#chat-log').append('<p><strong>You:</strong> ' + message + '</p>');
             $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
 
+            // Show the spinner
+            $('#spinner').show();
+
             $.ajax({
                 url: '/api/v1/textbot/public-chat',  // Update this URL to match your API endpoint
                 method: 'GET',
                 data: { input: message },
                 success: function(response) {
+                    // Hide the spinner
+                    $('#spinner').hide();
+
                     const data = response;
 
                     if (data.image_url) {
@@ -125,16 +147,12 @@
 
                         // Display the first quote on the image
                         if (data.quotes) {
-                            try {
-                                const quotes = JSON.parse(data.quotes.replace(/'/g, '"'));
+                            const quotes = data.quotes;
+                            const firstQuoteText = Object.keys(quotes)[0];
+                            const firstQuoteSource = quotes[firstQuoteText];
 
-                                if (quotes.length > 0) {
-                                    const firstQuoteText = Object.keys(quotes[0])[0];
-                                }
-                            } catch (error) {
-                                console.error('Error parsing quotes:', error);
-                                $('#chat-log').append('<p><strong>Error:</strong> Failed to parse quotes.</p>');
-                            }
+                            const quoteOverlay = $('<div class="quote-overlay"></div>').text(firstQuoteText + ' - ' + firstQuoteSource);
+                            imageContainer.append(quoteOverlay);
                         }
                     }
 
@@ -142,6 +160,9 @@
                     $('#message').val('');
                 },
                 error: function(xhr, status, error) {
+                    // Hide the spinner
+                    $('#spinner').hide();
+
                     console.log('Error:', status, error);
                     $('#chat-log').append('<p><strong>Error:</strong> Unable to retrieve response</p>');
                     $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);

@@ -190,7 +190,9 @@ class ChatManager:
 
     def get_image(self, request: HttpRequest, quotes_list):
         text_over_image = list(quotes_list.keys())[0]
-        return generate_image( request, self.prompt_creator.get_image_for_quote(text_over_image), text_over_image)
+        image_description = self.prompt_creator.get_image_description(text_over_image)
+        self.logger.info("image_description: " + str(image_description))
+        return generate_image( request, self.prompt_creator.get_image_based_on_description(image_description), text_over_image)
 
 
 

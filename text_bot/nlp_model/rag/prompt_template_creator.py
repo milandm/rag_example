@@ -484,7 +484,7 @@ You are inspiring artist and wise man and your art should motivate others.
 """
 
 
-IMAGE_FOR_QUOTE_V1 = """
+IMAGE_FOR_QUOTE_V2 = """
 
 This quote : 
 
@@ -494,8 +494,30 @@ should motivate someone to deal with his inner struggles.
 
 Create spiritual image that will motivate observer the same way as a quote. 
 
+!!! IMAGE SHOULD NOT CONTAIN EMBEDDED QUOTE TEXT !!!
+
 """
 
+# Image just need to visually suggest quote message.
+
+IMAGE_FOR_QUOTE_V1 = """
+
+Create spiritual image without any text or characters, just to resemble this mood: $text
+ 
+"""
+
+IMAGE_BASED_ON_DESCRIPTION_V1 = """
+
+Create spiritual image based on this description: $text
+
+"""
+
+
+IMAGE_DESCRIPTION_FOR_QUOTE_V1 = """
+
+Give description for the image that could be perfect background for this message: $text
+
+"""
 
 
 DOCUMENT_SEMANTIC_TEXT_CHUNKING_TEMPLATE_V1 = """for this given text : 
@@ -863,7 +885,19 @@ class PromptTemplateCreator:
                                             text_to_chunk=text_to_chunk)
         return user_prompt
 
+
+    def get_image_description(self, quote_for_image) -> str:
+        user_prompt = self.prepare_template(IMAGE_DESCRIPTION_FOR_QUOTE_V1,
+                                            text=quote_for_image)
+        return user_prompt
+
+
     def get_image_for_quote(self, quote_for_image) -> str:
         user_prompt = self.prepare_template(IMAGE_FOR_QUOTE_V1,
-                                            quote=quote_for_image)
+                                            text=quote_for_image)
+        return user_prompt
+
+    def get_image_based_on_description(self, image_description) -> str:
+        user_prompt = self.prepare_template(IMAGE_BASED_ON_DESCRIPTION_V1,
+                                            text=image_description)
         return user_prompt
