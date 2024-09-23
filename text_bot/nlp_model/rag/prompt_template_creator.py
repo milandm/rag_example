@@ -502,13 +502,18 @@ Create spiritual image that will motivate observer the same way as a quote.
 
 IMAGE_FOR_QUOTE_V1 = """
 
-Create spiritual image without any text or characters, just to resemble this mood: $text
+Create very calm spiritual image: 
+- moderate, 
+- without excessive usage of vibrant colors, 
+- without any text or characters, 
+- just to resemble this mood: $text
  
 """
 
 IMAGE_BASED_ON_DESCRIPTION_V1 = """
 
-Create spiritual image based on this description: $text
+Create very calm spiritual image, moderate, 
+without excessive usage of vibrant colors based on this description: $text
 
 """
 
