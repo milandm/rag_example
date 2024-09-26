@@ -110,12 +110,12 @@ class CTDocumentSectionManager(models.Manager):
         section_content_summary = semantic_section_json.get("section_content_summary", "")
         section_references = semantic_section_json.get("section_references", "")
         section_topics = semantic_section_json.get("section_topics", "")
-        section_number = semantic_section_json["section_number"]
-        title_embedding = semantic_section_json["title_embedding"]
-        text_embedding = semantic_section_json["text_embedding"]
-        content_summary_embedding = semantic_section_json["content_summary_embedding"]
-        references_embedding = semantic_section_json["references_embedding"]
-        topics_embedding = semantic_section_json["topics_embedding"]
+        section_number = semantic_section_json.get("section_number", 0)
+        title_embedding = semantic_section_json.get("title_embedding", "")
+        text_embedding = semantic_section_json.get("text_embedding", "")
+        content_summary_embedding = semantic_section_json.get("content_summary_embedding", "")
+        references_embedding = semantic_section_json.get("references_embedding", "")
+        topics_embedding = semantic_section_json.get("topics_embedding", "")
 
         ct_document_section = self.create(
             ct_document=ct_document,
@@ -137,10 +137,10 @@ class CTDocumentSectionManager(models.Manager):
         return ct_document_section
 
     def query_embedding_in_db(self, embedding):
-        return self.order_by(CosineDistance('content_summary_embedding', embedding)).all()[:20]
+        return self.order_by(CosineDistance('text_embedding', embedding)).all()[:20]
 
     def query_embedding_by_distance(self, embedding):
-        cosine_distance=CosineDistance('content_summary_embedding', embedding)
+        cosine_distance=CosineDistance('text_embedding', embedding)
         return self.annotate(cosine_distance=cosine_distance)\
             .filter(cosine_distance__lt=COSINE_DISTANCE_TRESHOLD)
         # return self.alias(cosine_distance=cosine_distance)\

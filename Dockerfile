@@ -10,11 +10,17 @@ RUN apt-get update && apt-get install -y \
     cmake \
     && rm -rf /var/lib/apt/lists/*
 
+
+# Add pydevd_pycharm to Python path (optional, usually not necessary if installed correctly)
+#ENV PYTHONPATH="/usr/local/lib/python3.9/site-packages:${PYTHONPATH}"
+
 # Copy the current directory contents into the container at /app
 COPY . /app
 
 # Upgrade pip
 RUN pip install --upgrade pip
+
+RUN pip install --no-cache-dir pydevd-pycharm~=241.18034.82
 
 # Copy your application's requirements.txt and install Python dependencies
 COPY requirements.txt .

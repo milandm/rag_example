@@ -23,6 +23,16 @@ from text_bot.nlp_model.rag.chat_manager import ChatManager
 from text_bot.nlp_model.openai_model import OpenaiModel
 from text_bot.nlp_model.text_extraction.extraction_manager import ExtractionManager
 from text_bot.nlp_model.llama_model import LLamaModel
+from text_bot.nlp_model.openai_mml import OpenaiMml
+from django.http import JsonResponse
+from django.shortcuts import render
+import json
+from custom_logger.universal_logger import UniversalLogger
+
+
+def chatbot_demo(request):
+    return render(request, 'rag_example/chat_bot.html')
+
 
 class TopChatsView(GenericViewSet):
 
@@ -99,14 +109,38 @@ class PublicTextBotAPIView(GenericViewSet):
     )
     @action(methods=["GET"], detail=True)
     def get_chat_response(self, request: Request):
+        logger = UniversalLogger('./log_files/app.log', max_bytes=1048576, backup_count=3)
         print(request.META)
 
-        chat_manager = ChatManager(OpenaiModel())
+        chat_manager = ChatManager(OpenaiModel(), OpenaiMml())
 
         input = request.query_params.get('input', '')
+        print("input"+input)
         # history_key = request.query_params.get('history_key', '')
 
-        response = chat_manager.send_user_query(input)
+        open_ai_response = chat_manager.send_user_query(input)
+
+        open_ai_response_json = json.loads(open_ai_response)
+
+        response_dict_format = dict()
+        response_dict_format[open_ai_response_json["quote1"]] = open_ai_response_json["author1"]
+        response_dict_format[open_ai_response_json["quote2"]] = open_ai_response_json["author2"]
+        response_dict_format[open_ai_response_json["quote3"]] = open_ai_response_json["author3"]
+
+        logger.info("response_dict_format created "+ str(response_dict_format))
+        try:
+            # formated_response_list = json.loads(response_dict)
+            image_url = chat_manager.get_image(request, response_dict_format)
+        except Exception as e:
+            logger.error(e)
+
+        response_dict = dict()
+        response_dict["image_url"] = image_url
+        response_dict["quotes"] = response_dict_format
+
+        logger.info("response_dict created " + str(response_dict))
+        response = response_dict
+        # response = JsonResponse(response_dict)
 
         if response:
             return Response(response)  # return the data in the DRF Response

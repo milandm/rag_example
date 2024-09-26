@@ -2,7 +2,7 @@ import openai
 from openai import OpenAI
 
 from typing import Union, Generator, Any
-from text_bot.nlp_model.nlp_model import NlpModel
+from text_bot.nlp_model.mml_model import MmlModel
 
 from text_bot.nlp_model.config import (
     OPENAI_API_KEY,
@@ -17,16 +17,11 @@ from langchain.chat_models import ChatOpenAI
 from typing import List, Callable
 import numpy as np
 from text_bot.utils import retry
-from pydantic import BaseModel
-
-
 
 EMBEDDING_MODEL = "text-embedding-3-small"
 # LLM_MODEL = "gpt-3.5-turbo"
 # LLM_MODEL = "gpt-4"
 LLM_MODEL ="gpt-4o"
-LLM_MODEL_STRUCTURED_OUTPUT = "gpt-4o-2024-08-06"
-
 
 IMAGE_MODEL = "dall-e-3"
 IMAGE_SIZE = "1024x1024"
@@ -38,7 +33,7 @@ IMAGE_QUALITY = "standard"
 MAX_TOKENS = 4096
 # MAX_TOKENS = 1024
 
-class OpenaiModel(NlpModel):
+class OpenaiMml(MmlModel):
 
     VECTOR_PARAMS_SIZE = 1536
     # VECTOR_PARAMS_SIZE = 3072
@@ -51,41 +46,20 @@ class OpenaiModel(NlpModel):
         openai.azure_endpoint = AZURE_OPENAI_ENDPOINT
         self.llm = ChatOpenAI(temperature=0, model_name=LLM_MODEL)
         self.open_ai_embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
-        self.client = OpenAI()
 
 
     def get_embedding(self, text):
         return self.open_ai_embeddings.embed_query(text)
 
-    @retry(max_retries=3, initial_delay=1, backoff=2)
-    def send_prompt( self, system_msg:str, user_prompt:str ):
-
-        response = openai.chat.completions.create(
-            # model="gpt-3.5-turbo",
-            model=LLM_MODEL,
-            messages=[{"role": "system", "content": system_msg},
-                       {"role": "user", "content": user_prompt}],
-            max_tokens = MAX_TOKENS,
-            temperature=0,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0
+    def generate_image(self, image_description_prompt):
+        response = openai.images.generate(
+            model=IMAGE_MODEL,
+            prompt=image_description_prompt,
+            size=IMAGE_SIZE,
+            quality=IMAGE_QUALITY,
+            n=1,
         )
         return response
-
-    @retry(max_retries=3, initial_delay=1, backoff=2)
-    def send_prompt_structured_output(self, system_msg: str,
-                                      user_prompt: str,
-                                      structured_output_model: BaseModel):
-        response = self.client.beta.chat.completions.parse(
-            model = LLM_MODEL_STRUCTURED_OUTPUT,
-            messages=[{"role": "system", "content": system_msg},
-                       {"role": "user", "content": user_prompt}],
-            response_format=structured_output_model,
-        )
-        return response
-
-
 
     def get_embeddings(self, sentences: List[str]) -> List[List[float]]:
         return self.open_ai_embeddings.embed_documents(sentences)

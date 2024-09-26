@@ -479,6 +479,52 @@ DOCUMENT_SYSTEM_MSG_SEMANTIC_TEXT_CHUNKING_V1 = """
 You are expert for clinical trial research and you should check if given response is correct.
 """
 
+IMAGE_CREATOR_SYSTEM_MSG_V1 = """
+You are inspiring artist and wise man and your art should motivate others.
+"""
+
+
+IMAGE_FOR_QUOTE_V2 = """
+
+This quote : 
+
+$quote 
+
+should motivate someone to deal with his inner struggles. 
+
+Create spiritual image that will motivate observer the same way as a quote. 
+
+!!! IMAGE SHOULD NOT CONTAIN EMBEDDED QUOTE TEXT !!!
+
+"""
+
+# Image just need to visually suggest quote message.
+
+IMAGE_FOR_QUOTE_V1 = """
+
+Create very calm spiritual image: 
+- moderate, 
+- without excessive usage of vibrant colors, 
+- without any text or characters, 
+- just to resemble this mood: $text
+ 
+"""
+
+IMAGE_BASED_ON_DESCRIPTION_V1 = """
+
+Create very calm spiritual image, moderate, 
+without excessive usage of vibrant colors based on this description: $text
+
+"""
+
+
+IMAGE_DESCRIPTION_FOR_QUOTE_V1 = """
+
+Give description for the image that could be perfect background for this message: $text
+
+"""
+
+
 DOCUMENT_SEMANTIC_TEXT_CHUNKING_TEMPLATE_V1 = """for this given text : 
 $text_to_chunk 
 
@@ -529,7 +575,7 @@ Output should look like this:
 
 
 DOCUMENT_SYSTEM_MSG_QUESTION_STATEMENT_V1 = """
-You are expert for clinical trial research and you should check if given response is correct.
+You are psychologist and wise man and you should find best motivational quotes to support users current psychological state.
 """
 
 QUESTION_STATEMENT_PROMPT_TEMPLATE_V1 = """
@@ -540,6 +586,13 @@ $question
 
 THREE_QUESTION_STATEMENTS_PROMPT_TEMPLATE_V1= """
 Formulate given question as a statement in three different ways. 
+Export json list of strings:
+
+QUESTION: $question 
+"""
+
+THREE_QUESTION_STATEMENTS_PROMPT_TEMPLATE_V2= """
+Formulate given question or statement as a statement in three different ways. 
 Export json list of strings:
 
 QUESTION: $question 
@@ -625,6 +678,70 @@ PLease check if this ANSWER contains all information requested by QUESTION.
 
 """
 
+QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V3 = """
+PSYCHOLOGICAL_STATE: $psychological_state
+SECTION_TEXT: $section_text
+
+From given SECTION_TEXT extract !!!MAXIMUM 3!!! !!!MOTIVATIONAL QUOTES!!! which are best to support person facing explained PSYCHOLOGICAL_STATE.
+    1. Dont give any additional explanation, just enlist related quotes
+    1. Enlist with bullet points all motivational quotes related to given PSYCHOLOGICAL_STATE!!!
+    2. Quotes should be exactly the same as given in SECTION_TEXT!!!
+
+If there is no any related information, please always answer with this answer:
+NO RELEVANT INFO    
+"""
+
+# Output should be just valid json list look like this:
+# {"quotes": {
+#     "some quote": "quote source",
+#     "some quote": "quote source",
+#     "some quote": "quote source"
+# }}
+
+
+QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V5 = """
+PSYCHOLOGICAL_STATE: $psychological_state
+SECTION_TEXT: $section_text
+
+From given SECTION_TEXT extract !!!MAXIMUM 3!!! !!!MOTIVATIONAL QUOTES!!! which are best to support person facing explained PSYCHOLOGICAL_STATE.
+    1. Dont give any additional explanation, just enlist related quotes
+    1. Enlist with bullet points all motivational quotes related to given PSYCHOLOGICAL_STATE!!!
+    2. Quotes should be exactly the same as given in SECTION_TEXT!!!
+
+If there is no any related information, please always answer with this answer:
+NO RELEVANT INFO    
+
+Output should be json look like this:
+[{"some quote": "quote source"},
+    {"some quote": "quote source"},
+    {"some quote": "quote source"}]
+
+"""
+
+QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V4 = """
+PSYCHOLOGICAL_STATE: $psychological_state
+SECTION_TEXT: $section_text
+
+From given SECTION_TEXT extract !!!MAXIMUM 3!!! !!!MOTIVATIONAL QUOTES!!! which are best to support person facing explained PSYCHOLOGICAL_STATE.
+    1. Dont give any additional explanation, just enlist related quotes
+    1. Enlist with bullet points all motivational quotes related to given PSYCHOLOGICAL_STATE!!!
+    2. Quotes should be exactly the same as given in SECTION_TEXT!!!
+
+ANSWER should be formatted as json list.
+
+If there is no any related information, please always answer with this answer:
+NO RELEVANT INFO    
+
+PLease check if this ANSWER contains all MOTIVATIONAL quotes related to explained PSYCHOLOGICAL_STATE.
+
+Output should look like this:
+ANSWER: [
+    {"some quote": "quote source"},
+    {"some quote": "quote source"},
+    {"some quote": "quote source"}
+]
+
+"""
 
 
 # ```json
@@ -747,12 +864,12 @@ class PromptTemplateCreator:
         return user_prompt
 
     def get_three_question_statements(self, question: str) -> str:
-        user_prompt = self.prepare_template(THREE_QUESTION_STATEMENTS_PROMPT_TEMPLATE_V1, question=question)
+        user_prompt = self.prepare_template(THREE_QUESTION_STATEMENTS_PROMPT_TEMPLATE_V2, question=question)
         return user_prompt
 
-    def get_question_related_information(self, question: str, section_text: str) -> str:
-        user_prompt = self.prepare_template(QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V1,
-                                            question=question,
+    def get_question_related_information(self, psychological_state: str, section_text: str) -> str:
+        user_prompt = self.prepare_template(QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V3,
+                                            psychological_state=psychological_state,
                                             section_text=section_text)
         return user_prompt
 
@@ -771,4 +888,21 @@ class PromptTemplateCreator:
         text_to_chunk = new_text_to_chunk+" "+last_previous_section
         user_prompt = self.prepare_template(DOCUMENT_SEMANTIC_TEXT_CHUNKING_TEMPLATE_V1,
                                             text_to_chunk=text_to_chunk)
+        return user_prompt
+
+
+    def get_image_description(self, quote_for_image) -> str:
+        user_prompt = self.prepare_template(IMAGE_DESCRIPTION_FOR_QUOTE_V1,
+                                            text=quote_for_image)
+        return user_prompt
+
+
+    def get_image_for_quote(self, quote_for_image) -> str:
+        user_prompt = self.prepare_template(IMAGE_FOR_QUOTE_V1,
+                                            text=quote_for_image)
+        return user_prompt
+
+    def get_image_based_on_description(self, image_description) -> str:
+        user_prompt = self.prepare_template(IMAGE_BASED_ON_DESCRIPTION_V1,
+                                            text=image_description)
         return user_prompt

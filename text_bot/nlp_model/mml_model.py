@@ -1,10 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Tuple, Iterable, Type, Union, Callable, Optional, Generator, Any
 from numpy import ndarray
-from pydantic import BaseModel
 
-
-class NlpModel(ABC):
+class MmlModel(ABC):
 
     # VECTOR_PARAMS_SIZE = 384
     VECTOR_PARAMS_SIZE = 1536
@@ -19,12 +17,5 @@ class NlpModel(ABC):
         pass
 
     @abstractmethod
-    def send_prompt( self, system_msg:str, user_prompt:str ):
-        pass
-
-
-    @abstractmethod
-    def send_prompt_structured_output(self, system_msg: str,
-                                      user_prompt: str,
-                                      structured_output_model: BaseModel):
+    def generate_image(self, image_description_prompt:str):
         pass

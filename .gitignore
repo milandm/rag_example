@@ -122,6 +122,9 @@ documents_to_vectorize/
 documents_to_vectorize1/
 media/
 
+documents_to_vectorize/
+documents_to_vectorize1/
+
 # Sublime Text # 
 *.tmlanguage.cache 
 *.tmPreferences.cache 
@@ -146,3 +149,4 @@ GitHub.sublime-settings
 !.vscode/launch.json 
 !.vscode/extensions.json 
 .history
+.pylintrc

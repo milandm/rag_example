@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            max-width: 600px;
+            margin: auto;
+            width: 100%;
+        }
+        #chat-log {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+        }
+        #chat-log p {
+            margin: 10px 0;
+        }
+        .image-container {
+            position: relative;
+            margin-top: 10px;
+        }
+        .image-container img {
+            max-width: 100%;
+            border-radius: 5px;
+        }
+        #chat-form {
+            display: flex;
+            width: 100%;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+        }
+        #message {
+            flex: 1;
+            padding: 10px;
+            font-size: 1.1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+            box-sizing: border-box;
+            width: calc(100% - 80px);
+        }
+        #chat-form button {
+            padding: 10px 20px;
+            font-size: 1.1em;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 60px;
+        }
+        #chat-form button:hover {
+            background-color: #0056b3;
+        }
+        /* Spinner styles */
+        #spinner {
+            display: none;
+            margin: auto;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #007bff;
+            width: 24px;
+            height: 24px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="chat-container">
+    <div id="chat-log"></div>
+    <div id="spinner"></div> <!-- Spinner element -->
+    <form id="chat-form">
+        <input type="text" name="message" id="message" placeholder="Type your message..." autocomplete="off" required>
+        <button type="submit">Send</button>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#chat-form').submit(function(event) {
+            event.preventDefault();
+            const message = $('#message').val();
+
+            // Append user's message to chat log
+            $('#chat-log').append('<p><strong>You:</strong> ' + message + '</p>');
+            $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
+
+            // Show the spinner
+            $('#spinner').show();
+
+            $.ajax({
+                url: '/api/v1/textbot/public-chat',  // Update this URL to match your API endpoint
+                method: 'GET',
+                data: { input: message },
+                success: function(response) {
+                    // Hide the spinner
+                    $('#spinner').hide();
+
+                    const data = response;
+
+                    if (data.image_url) {
+                        const imageContainer = $('<div class="image-container"></div>');
+                        const imgElement = $('<img src="' + data.image_url + '" alt="Generated Image">');
+                        imageContainer.append(imgElement);
+                        $('#chat-log').append(imageContainer);
+                    }
+
+                    $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
+                    $('#message').val('');
+                },
+                error: function(xhr, status, error) {
+                    // Hide the spinner
+                    $('#spinner').hide();
+
+                    console.log('Error:', status, error);
+                    $('#chat-log').append('<p><strong>Error:</strong> Unable to retrieve response</p>');
+                    $('#chat-log').scrollTop($('#chat-log')[0].scrollHeight);
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

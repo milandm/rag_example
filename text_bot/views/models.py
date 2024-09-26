@@ -36,6 +36,9 @@ class UserHistory(models.Model):
 
 # multi-qa-distilbert-cos-v1
 MULTI_QA_DISTILBERT_COS_V1_VECTOR_SIZE = 1536
+
+# MULTI_QA_DISTILBERT_COS_V1_VECTOR_SIZE = 3072
+
 class ChatQuestion(models.Model):
 
     class Meta:
@@ -484,3 +487,25 @@ class CTDocumentSubsectionTopics(models.Model):
 #         }
 #     ]
 # }
+
+
+class QuotesDocuments(models.Model):
+    class Meta:
+        ordering = ['-id']
+        indexes = [
+            HnswIndex(
+                name='text_embedding_hnsw_index',
+                fields=['text_embedding'],
+                m=16,
+                ef_construction=64,
+                opclasses=['vector_cosine_ops']
+            )
+        ]
+
+    section_text_value = models.CharField(max_length=1500)
+
+    text_embedding = VectorField(dimensions=MULTI_QA_DISTILBERT_COS_V1_VECTOR_SIZE)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = CTDocumentSectionManager()

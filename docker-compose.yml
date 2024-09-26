@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   db:
-    image: postgres:latest
+    image: ramsrib/pgvector:16
     env_file:
       - .env
     ports:
@@ -10,9 +8,17 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./add_pgvector.sh:/docker-entrypoint-initdb.d/10-add-pgvector.sh
+    networks:
+      - djangonetwork
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   app:
-    image: cobol-code-migration-image-app:latest
+    image: rag-example-image-app:latest
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -20,11 +26,18 @@ services:
       - .:/app
     ports:
       - "8000:8000"
+      - "5678:5678"
+    links:
+      - db:db
     depends_on:
       - db
       - neo4j
     env_file:
       - .env
+    networks:
+      - djangonetwork
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   neo4j:
     image: neo4j:latest
@@ -35,7 +48,16 @@ services:
       - neo4jdata:/data
     environment:
       - NEO4J_AUTH=neo4j/neo4jpassword
+    networks:
+      - djangonetwork
 
 volumes:
   pgdata:
   neo4jdata:
+
+networks:
+  djangonetwork:
+    driver: bridge
+
+#  default:
+#    name: my_network
