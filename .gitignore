@@ -118,6 +118,9 @@ venv.bak/
 docker_image/
 log_files/
 json_export/
+documents_to_vectorize/
+documents_to_vectorize1/
+media/
 
 # Sublime Text # 
 *.tmlanguage.cache 
