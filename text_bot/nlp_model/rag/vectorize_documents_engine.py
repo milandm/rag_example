@@ -27,6 +27,7 @@ from text_bot.views.models import CTDocument, \
 
 from text_bot.nlp_model.rag.prompt_creator import PromptCreator
 from text_bot.nlp_model.mml_model import MmlModel
+from text_bot.nlp_model.replicate_model import ReplicateModel
 
 MAX_CHUNK_SIZE = 500
 MAX_CHUNK_OVERLAP_SIZE = 250
@@ -50,8 +51,22 @@ class VectorizeDocumentsEngine:
         self.pages_splitter = RecursiveCharacterTextSplitter(chunk_size=MAX_PAGE_SIZE, chunk_overlap=0)
         self.markdown_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=HEADERS_TO_SPLIT_ON)
 
+        self.replicate_model = ReplicateModel()
+
 
     def load_documents_to_db(self):
+        documents = load_documents("documents/")
+        for document_pages in documents:
+
+            document_pages_formatted = self.get_document_split_pages(document_pages)
+            md_header_splits = self.markdown_splitter.split_text(document_pages_formatted)
+
+            self.replicate_model.do_all_evaluations(md_header_splits)
+
+
+
+
+    def load_documents_to_db_1(self):
         documents = load_documents("documents/")
         for document_pages in documents:
 

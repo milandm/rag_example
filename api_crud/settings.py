@@ -48,6 +48,12 @@ REST_FRAMEWORK = {
     #     # 'rest_framework_simplejwt.authentication.JWTAuthentication',
     #     'rest_framework.authentication.TokenAuthentication',
     # ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
@@ -70,7 +76,15 @@ INSTALLED_APPS = [
     'text_bot',
     'drf_yasg',
     'corsheaders',
+    'oauth2_provider',
 ]
+
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'oauth2_provider.backends.OAuth2Backend',
+)
+
 
 SITE_ID = 1
 

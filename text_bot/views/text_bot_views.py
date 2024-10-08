@@ -158,6 +158,7 @@ class TextBotAPIView(GenericViewSet):
     serializer_class = TextbotOutputSerializer
     pagination_class = CustomPagination
 
+
     @swagger_auto_schema(
         method="GET",
         manual_parameters=[openapi.Parameter('Authorization', openapi.IN_HEADER,
@@ -173,6 +174,9 @@ class TextBotAPIView(GenericViewSet):
     @action(methods=["GET"], detail=True)
     def get_chat_response(self, request: Request):
         print(request.META)
+
+        # Get the current authenticated user
+        user = request.user
 
         input = request.query_params.get('input', '')
         history_key = request.query_params.get('history_key', '')
