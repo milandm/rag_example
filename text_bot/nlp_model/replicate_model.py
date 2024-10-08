@@ -14,6 +14,7 @@ import replicate
 from text_bot.nlp_model.config import REPLICATE_API_TOKEN
 
 from collections.abc import Generator
+from custom_logger.universal_logger import UniversalLogger
 
 # import replicate
 #
@@ -52,11 +53,20 @@ class ReplicateModel(NlpModel):
         # self.model = replicate.models.get(self.model_name)
         # self.version = self.model.versions.list()[0]
 
-        # Initialize the Replicate client
-        self.replicate_client = replicate.Client(api_token=REPLICATE_API_TOKEN)
+        # # Initialize the Replicate client
+        # self.replicate_client = replicate.Client(api_token=REPLICATE_API_TOKEN)
+        #
+        # # Load the Llama 3.1 model
+        # self.model = self.replicate_client.models.get(LLM_MODEL)
 
-        # Load the Llama 3.1 model
-        self.model = replicate.models.get(LLM_MODEL)
+        # self.replicate_stream = replicate.stream(
+        #         "meta/meta-llama-3-70b",
+        #         input=input
+        #     )
+
+        self.logger = UniversalLogger('./log_files/app.log', max_bytes=1048576, backup_count=3)
+
+
 
 
     def get_embedding(self, text: str) -> List[float]:
@@ -68,22 +78,40 @@ class ReplicateModel(NlpModel):
     @retry(max_retries=3, initial_delay=1, backoff=2)
     def send_prompt(self, prompt: str, max_length: int = 512, temperature: float = 0.6, top_p: float = 0.9, **kwargs) -> str:
         """Send a prompt to the LLaMA model and get the generated text."""
-        input_params = {
+        input = {
+            "top_p": 0.9,
             "prompt": prompt,
-            "max_length": max_length,
-            "temperature": temperature,
-            "top_p": top_p,
+            "min_tokens": 0,
+            "temperature": 0.6,
+            "presence_penalty": 1.15
         }
-        input_params.update(kwargs)
+
         output = replicate.run(
-            f"{self.model_name}:{self.version.id}",
-            input=input_params
+            "meta/meta-llama-3-70b",
+            input=input
         )
-        # If the output is a generator (streaming), concatenate the outputs
-        if isinstance(output, Generator):
-            return ''.join([o for o in output])
-        else:
-            return output
+        print("".join(output))
+        return output
+
+
+    @retry(max_retries=3, initial_delay=1, backoff=2)
+    def predict(self, prompt: str, max_length: int = 512, temperature: float = 0.6, top_p: float = 0.9, **kwargs) -> str:
+        """Send a prompt to the LLaMA model and get the generated text."""
+        input = {
+            "top_p": 0.9,
+            "prompt": prompt,
+            "min_tokens": 0,
+            # "max_tokens": 0,
+            "temperature": 0.6,
+            "presence_penalty": 1.15
+        }
+
+        prediction = replicate.predictions.create(
+            model="meta/meta-llama-3-70b",
+            input=input
+        )
+        print("".join(prediction))
+        return prediction
 
 
 
@@ -144,7 +172,7 @@ class ReplicateModel(NlpModel):
         prompt = f"Fill in the blank: {masked_sentence}"
 
         # Generate prediction using the model
-        output = self.model.predict(prompt=prompt, max_tokens=5)
+        output = self.predict(prompt=prompt)
 
         # Extract the predicted word from the model's output
         predicted_word = output.strip().split()[0]
@@ -159,7 +187,7 @@ class ReplicateModel(NlpModel):
             if predicted_word.lower() == actual_word.lower():
                 correct += 1
         accuracy = correct / total * 100
-        print(f"Cloze Test Accuracy: {accuracy:.2f}%")
+        self.logger.info(f"Cloze Test Accuracy: {accuracy:.2f}%")
 
     def do_evaluation_test(self, corpus_text):
         # Example usage:
@@ -188,7 +216,7 @@ class ReplicateModel(NlpModel):
         prompt = f"{prompt}"
 
         # Generate prediction using the model
-        output = self.model.predict(prompt=prompt, max_tokens=5)
+        output = self.predict(prompt=prompt)
 
         # Extract the predicted word from the model's output
         predicted_word = output.strip().split()[0]
@@ -203,7 +231,7 @@ class ReplicateModel(NlpModel):
             if predicted_word.lower() == actual_next_word.lower():
                 correct += 1
         accuracy = correct / total * 100
-        print(f"Next Word Prediction Accuracy: {accuracy:.2f}%")
+        self.logger.info(f"Next Word Prediction Accuracy: {accuracy:.2f}%")
 
 
     def do_next_word_prediction_evaluation(self, sentences):
@@ -217,7 +245,7 @@ class ReplicateModel(NlpModel):
         # Step 2: Split text into sentences
         sentences = self.split_into_sentences(corpus_text)
 
-        # Cloze Test Evaluation
+        # Cloze Test Evaluationprint
         cloze_samples = self.create_cloze_test_samples(sentences, num_samples=50)
         self.evaluate_cloze_test(cloze_samples)
 
@@ -226,4 +254,5 @@ class ReplicateModel(NlpModel):
         self.evaluate_next_word_prediction(next_word_samples)
 
 
-
+    def send_prompt_structured_output(self):
+        self.logger.info("send_prompt_structured_output")

@@ -28,6 +28,7 @@ from text_bot.views.models import CTDocument, \
 from text_bot.nlp_model.rag.prompt_creator import PromptCreator
 from text_bot.nlp_model.mml_model import MmlModel
 from text_bot.nlp_model.replicate_model import ReplicateModel
+from custom_logger.universal_logger import UniversalLogger
 
 MAX_CHUNK_SIZE = 500
 MAX_CHUNK_OVERLAP_SIZE = 250
@@ -52,6 +53,8 @@ class VectorizeDocumentsEngine:
         self.markdown_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=HEADERS_TO_SPLIT_ON)
 
         self.replicate_model = ReplicateModel()
+
+        self.logger = UniversalLogger('./log_files/app.log', max_bytes=1048576, backup_count=3)
 
 
     def load_documents_to_db(self):
