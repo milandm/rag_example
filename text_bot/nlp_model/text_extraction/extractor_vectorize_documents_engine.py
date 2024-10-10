@@ -60,6 +60,8 @@ class ExtractorVectorizeDocumentsEngine:
         self.add_document_page(document_pages_formatted)
         self.add_document_splits(documents_splits)
 
+
+
     def load_semantic_document_chunks_to_db(self, document_path):
         document_pages = load_document(document_path)
 

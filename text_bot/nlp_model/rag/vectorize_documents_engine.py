@@ -57,8 +57,8 @@ class VectorizeDocumentsEngine:
         self.logger = UniversalLogger('./log_files/app.log', max_bytes=1048576, backup_count=3)
 
 
-    def load_documents_to_db(self):
-        documents = load_documents("documents/")
+    def load_documents_to_db_v1(self):
+        documents = load_documents("documents_to_vectorize/")
         for document_pages in documents:
 
             document_pages_formatted = self.get_document_split_pages(document_pages)
@@ -66,6 +66,39 @@ class VectorizeDocumentsEngine:
 
             self.replicate_model.do_all_evaluations(md_header_splits)
 
+
+    def load_documents_to_db(self):
+        documents = load_documents("documents_to_vectorize/")
+
+        # Initialize accumulators
+        total_cloze_correct = 0
+        total_cloze_total = 0
+        total_next_word_correct = 0
+        total_next_word_total = 0
+
+        for document_pages in documents:
+            document_pages_formatted = self.get_document_split_pages(document_pages)
+
+            for document_page in document_pages_formatted:
+
+                # Perform evaluations
+                results = self.replicate_model.do_all_evaluations(document_page.page_content)
+
+                # Update accumulators
+                total_cloze_correct += results['cloze_correct']
+                total_cloze_total += results['cloze_total']
+                total_next_word_correct += results['next_word_correct']
+                total_next_word_total += results['next_word_total']
+
+        # Calculate overall accuracies
+        overall_cloze_accuracy = (total_cloze_correct / total_cloze_total) * 100 if total_cloze_total > 0 else 0
+        overall_next_word_accuracy = (
+                                                 total_next_word_correct / total_next_word_total) * 100 if total_next_word_total > 0 else 0
+
+        # Log the overall accuracies
+        self.logger.info(f"Overall Cloze Test Accuracy across all documents: {overall_cloze_accuracy:.2f}%")
+        self.logger.info(
+            f"Overall Next Word Prediction Accuracy across all documents: {overall_next_word_accuracy:.2f}%")
 
 
 
@@ -93,6 +126,7 @@ class VectorizeDocumentsEngine:
                     documents_splits = self.recursive_text_splitter.split_documents([document_page_formatted])
                     previous_last_semantic_chunk = self.add_semantic_document_splits(documents_splits, previous_last_semantic_chunk, document_page_idx)
                     self.add_document_page(document_page_formatted, document_page_idx)
+
 
     def splits_already_added_to_db(self, ct_document, documents_splits):
         old_document_splits_count = ct_document.document_splits.all().count()

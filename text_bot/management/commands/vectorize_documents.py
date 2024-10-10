@@ -9,7 +9,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # Your code to create mock data here
         vectorize_documents_engine = VectorizeDocumentsEngine(OpenaiModel(), OpenaiMml())
-        vectorize_documents_engine.load_semantic_document_chunks_to_db()
+        vectorize_documents_engine.load_documents_to_db()
         self.stdout.write(self.style.SUCCESS('Successfully created mock data'))
 
 

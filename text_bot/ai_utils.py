@@ -14,6 +14,15 @@ from typing import List
 from sentence_transformers import SentenceTransformer, util
 from collections import OrderedDict
 import tiktoken
+import nltk
+
+nltk.download('punkt')
+
+def split_into_sentences(text):
+    from nltk.tokenize import sent_tokenize
+    sentences = sent_tokenize(text)
+    return sentences
+
 
 CL100K_BASE_ENCODING_NAME = "cl100k_base"
 

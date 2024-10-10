@@ -93,9 +93,29 @@ class ReplicateModel(NlpModel):
         print("".join(output))
         return output
 
+    @retry(max_retries=3, initial_delay=1, backoff=2)
+    def predict_v3(self, prompt: str, max_length: int = 512, temperature: float = 0.6, top_p: float = 0.9,
+                **kwargs) -> str:
+        """Send a prompt to the LLaMA model and get the generated text."""
+        input = {
+            "top_p": top_p,
+            "prompt": prompt,
+            "min_tokens": 0,
+            "temperature": temperature,
+            "presence_penalty": 1.15
+        }
+
+        output = replicate.run(
+            "meta/meta-llama-3-70b",
+            input=input
+        )
+
+        print(output)
+        return output
+
 
     @retry(max_retries=3, initial_delay=1, backoff=2)
-    def predict(self, prompt: str, max_length: int = 512, temperature: float = 0.6, top_p: float = 0.9, **kwargs) -> str:
+    def predict_v1(self, prompt: str, max_length: int = 512, temperature: float = 0.6, top_p: float = 0.9, **kwargs) -> str:
         """Send a prompt to the LLaMA model and get the generated text."""
         input = {
             "top_p": 0.9,
@@ -112,6 +132,44 @@ class ReplicateModel(NlpModel):
         )
         print("".join(prediction))
         return prediction
+
+
+    @retry(max_retries=3, initial_delay=1, backoff=2)
+    def predict(self, prompt: str, max_length: int = 512, temperature: float = 0.6, top_p: float = 0.9,
+                **kwargs) -> str:
+        """Send a prompt to the LLaMA model and get the generated text."""
+        input = {
+            "top_p": top_p,
+            "prompt": prompt,
+            "min_tokens": 0,
+            "temperature": temperature,
+            "presence_penalty": 1.15
+        }
+
+        prediction = None
+
+        try:
+            prediction = replicate.predictions.create(
+                model="meta/meta-llama-3-70b",
+                input=input
+            )
+
+            # Wait for the prediction to complete
+            prediction.wait()
+        except Exception as e:
+            self.logger.error(e)
+
+        # Check if the prediction succeeded
+        if prediction and prediction.status == "succeeded":
+            output = prediction.output
+        else:
+            raise Exception(f"Prediction failed: {prediction.error}")
+
+        # Print and return the output
+        print(output)
+        return output
+
+
 
 
 
@@ -179,6 +237,7 @@ class ReplicateModel(NlpModel):
         return predicted_word
 
 
+
     def evaluate_cloze_test(self, samples):
         correct = 0
         total = len(samples)
@@ -188,6 +247,7 @@ class ReplicateModel(NlpModel):
                 correct += 1
         accuracy = correct / total * 100
         self.logger.info(f"Cloze Test Accuracy: {accuracy:.2f}%")
+        return correct, total
 
     def do_evaluation_test(self, corpus_text):
         # Example usage:
@@ -222,7 +282,6 @@ class ReplicateModel(NlpModel):
         predicted_word = output.strip().split()[0]
         return predicted_word
 
-
     def evaluate_next_word_prediction(self, samples):
         correct = 0
         total = len(samples)
@@ -232,6 +291,7 @@ class ReplicateModel(NlpModel):
                 correct += 1
         accuracy = correct / total * 100
         self.logger.info(f"Next Word Prediction Accuracy: {accuracy:.2f}%")
+        return correct, total
 
 
     def do_next_word_prediction_evaluation(self, sentences):
@@ -240,18 +300,26 @@ class ReplicateModel(NlpModel):
         self.evaluate_next_word_prediction(next_word_samples)
 
 
-    def do_all_evaluations(self, corpus_text):
 
-        # Step 2: Split text into sentences
+    def do_all_evaluations(self, corpus_text):
+        # Split text into sentences
         sentences = self.split_into_sentences(corpus_text)
 
-        # Cloze Test Evaluationprint
+        # Cloze Test Evaluation
         cloze_samples = self.create_cloze_test_samples(sentences, num_samples=50)
-        self.evaluate_cloze_test(cloze_samples)
+        cloze_correct, cloze_total = self.evaluate_cloze_test(cloze_samples)
 
         # Next Word Prediction Evaluation
         next_word_samples = self.create_next_word_prediction_samples(sentences, num_samples=50)
-        self.evaluate_next_word_prediction(next_word_samples)
+        next_word_correct, next_word_total = self.evaluate_next_word_prediction(next_word_samples)
+
+        # Return the results
+        return {
+            'cloze_correct': cloze_correct,
+            'cloze_total': cloze_total,
+            'next_word_correct': next_word_correct,
+            'next_word_total': next_word_total
+        }
 
 
     def send_prompt_structured_output(self):
