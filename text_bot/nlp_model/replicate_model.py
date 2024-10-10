@@ -225,7 +225,7 @@ class ReplicateModel(NlpModel):
         return samples
 
 
-    def predict_masked_word(self, masked_sentence):
+    def predict_masked_word_v1(self, masked_sentence):
         # Prepare the prompt for Llama 3.1
         prompt = f"Fill in the blank: {masked_sentence}"
 
@@ -236,6 +236,25 @@ class ReplicateModel(NlpModel):
         predicted_word = output.strip().split()[0]
         return predicted_word
 
+
+    def predict_masked_word(self, masked_sentence):
+        # Prepare the prompt for Llama 3.1
+        prompt = f"Fill in the blank: {masked_sentence}"
+
+        # Generate prediction using the model
+        output = self.predict(prompt=prompt)
+
+        # Handle the case where output is a list
+        if isinstance(output, list):
+            output_text = ''.join(output)
+        elif isinstance(output, str):
+            output_text = output
+        else:
+            raise TypeError(f"Unexpected type for output: {type(output)}")
+
+        # Extract the predicted word from the model's output
+        predicted_word = output_text.strip().split()[0]
+        return predicted_word
 
 
     def evaluate_cloze_test(self, samples):
