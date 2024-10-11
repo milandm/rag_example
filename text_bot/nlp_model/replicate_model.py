@@ -226,11 +226,14 @@ class ReplicateModel(NlpModel):
 
 
     def predict_masked_word_v1(self, masked_sentence):
+        self.logger.info(f"masked_sentence: " + masked_sentence)
         # Prepare the prompt for Llama 3.1
-        prompt = f"Fill in the blank: {masked_sentence}"
+        prompt = f"Fill in the mask words in sentences. Output need to be in Romani language: {masked_sentence}"
 
         # Generate prediction using the model
         output = self.predict(prompt=prompt)
+
+        self.logger.info(f"predict_masked_word output: " + str(output))
 
         # Extract the predicted word from the model's output
         predicted_word = output.strip().split()[0]
@@ -238,11 +241,14 @@ class ReplicateModel(NlpModel):
 
 
     def predict_masked_word(self, masked_sentence):
+        self.logger.info(f"masked_sentence: "+masked_sentence)
         # Prepare the prompt for Llama 3.1
-        prompt = f"Fill in the blank: {masked_sentence}"
+        prompt = f"Fill in the mask words in sentences. Output need to be in Romani language: {masked_sentence}"
 
         # Generate prediction using the model
         output = self.predict(prompt=prompt)
+
+        self.logger.info(f"predict_masked_word output: " + str(output))
 
         # Handle the case where output is a list
         if isinstance(output, list):
@@ -252,8 +258,10 @@ class ReplicateModel(NlpModel):
         else:
             raise TypeError(f"Unexpected type for output: {type(output)}")
 
-        # Extract the predicted word from the model's output
-        predicted_word = output_text.strip().split()[0]
+        predicted_word = ""
+        if output_text and output_text.strip().split():
+            # Extract the predicted word from the model's output
+            predicted_word = output_text.strip().split()[0]
         return predicted_word
 
 
@@ -289,7 +297,6 @@ class ReplicateModel(NlpModel):
                 samples.append((prompt, actual_next_word))
         return samples
 
-
     def predict_next_word(self, prompt):
         # Prepare the prompt for Llama 3.1
         prompt = f"{prompt}"
@@ -297,9 +304,24 @@ class ReplicateModel(NlpModel):
         # Generate prediction using the model
         output = self.predict(prompt=prompt)
 
-        # Extract the predicted word from the model's output
-        predicted_word = output.strip().split()[0]
+        # Handle the case where output is a list
+        if isinstance(output, list):
+            output_text = ''.join(output)
+        elif isinstance(output, str):
+            output_text = output
+        else:
+            raise TypeError(f"Unexpected type for output: {type(output)}")
+
+        predicted_word = ""
+        if output_text and output_text.strip().split():
+            # Extract the predicted word from the model's output
+            predicted_word = output_text.strip().split()[0]
+
         return predicted_word
+
+
+
+
 
     def evaluate_next_word_prediction(self, samples):
         correct = 0
