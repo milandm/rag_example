@@ -25,9 +25,10 @@ STRUCTURED_OUTPUT_SYSTEM_PROMPT = """You are a bot that ONLY responds with an in
 class LlamaStructuredPromptCreator:
 
 
-    def get_generate_json_structured_output_prompt(self, system_msg: str = STRUCTURED_OUTPUT_SYSTEM_PROMPT,
-                                      user_prompt: str = "",
-                                      structured_output_model: BaseModel = BaseModel()):
+    def get_generate_json_structured_output_prompt(self,
+                                                  system_msg: str = STRUCTURED_OUTPUT_SYSTEM_PROMPT,
+                                                  user_prompt: str = "",
+                                                  structured_output_model: BaseModel = None):
         schema = json.dumps(structured_output_model.model_json_schema())
 
         prompt = f"""

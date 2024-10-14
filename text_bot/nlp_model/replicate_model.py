@@ -214,19 +214,23 @@ class ReplicateModel(NlpModel):
 
     def send_prompt_structured_output(self, system_msg: str = STRUCTURED_OUTPUT_SYSTEM_PROMPT,
                                       user_prompt: str = "",
-                                      structured_output_model: BaseModel = BaseModel()):
+                                      structured_output_model: BaseModel = None):
         self.logger.info("send_prompt_structured_output")
-        structured_prompt = self.llama_structured_prompt_creator.get_generate_json_structured_output_prompt(user_prompt = user_prompt,
-                                                                                                            structured_output_model = structured_output_model )
+        structured_prompt = self.llama_structured_prompt_creator.get_generate_json_structured_output_prompt(
+            system_msg = system_msg,
+            user_prompt = user_prompt,
+            structured_output_model = structured_output_model )
         output = self.predict(prompt=structured_prompt)
         return output
 
 
     def predict_structured_output(self, system_msg: str = STRUCTURED_OUTPUT_SYSTEM_PROMPT,
                                       user_prompt: str = "",
-                                      structured_output_model: BaseModel = BaseModel()):
+                                      structured_output_model: BaseModel = None):
         self.logger.info("send_prompt_structured_output")
-        structured_prompt = self.llama_structured_prompt_creator.get_generate_json_structured_output_prompt(user_prompt = user_prompt,
-                                                                                                            structured_output_model = structured_output_model )
+        structured_prompt = self.llama_structured_prompt_creator.get_generate_json_structured_output_prompt(
+            system_msg = system_msg,
+            user_prompt = user_prompt,
+            structured_output_model = structured_output_model )
         output = self.predict(prompt=structured_prompt)
         return output

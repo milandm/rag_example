@@ -27,8 +27,8 @@ from text_bot.views.models import CTDocument, \
 
 from text_bot.nlp_model.rag.prompt_creator import PromptCreator
 from text_bot.nlp_model.mml_model import MmlModel
-from text_bot.nlp_model.replicate_model import ReplicateModel
 from custom_logger.universal_logger import UniversalLogger
+from text_bot.nlp_model.rag.evaluation_engine import EvaluationEngine
 
 MAX_CHUNK_SIZE = 500
 MAX_CHUNK_OVERLAP_SIZE = 250
@@ -52,7 +52,7 @@ class VectorizeDocumentsEngine:
         self.pages_splitter = RecursiveCharacterTextSplitter(chunk_size=MAX_PAGE_SIZE, chunk_overlap=0)
         self.markdown_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=HEADERS_TO_SPLIT_ON)
 
-        self.replicate_model = ReplicateModel()
+        self.evaluation_engine = EvaluationEngine()
 
         self.logger = UniversalLogger('./log_files/app.log', max_bytes=1048576, backup_count=3)
 
@@ -64,7 +64,7 @@ class VectorizeDocumentsEngine:
             document_pages_formatted = self.get_document_split_pages(document_pages)
             md_header_splits = self.markdown_splitter.split_text(document_pages_formatted)
 
-            self.replicate_model.do_all_evaluations(md_header_splits)
+            self.evaluation_engine.do_all_evaluations(md_header_splits)
 
 
     def load_documents_to_db(self):
@@ -82,7 +82,7 @@ class VectorizeDocumentsEngine:
             for document_page in document_pages_formatted:
 
                 # Perform evaluations
-                results = self.replicate_model.do_all_evaluations(document_page.page_content)
+                results = self.evaluation_engine.do_all_evaluations(document_page.page_content)
 
                 # Update accumulators
                 total_cloze_correct += results['cloze_correct']
