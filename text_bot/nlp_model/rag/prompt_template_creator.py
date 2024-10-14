@@ -6,6 +6,32 @@ from string import Template
 # assistant messages describe previous responses in the conversation. We'll cover how to have an interactive conversation in later tasks
 
 
+EXTRACT_CERTIFICATE_DATA_V1 = """
+DOCUMENT_CONTENT: $document_content
+
+From DOCUMENT_CONTENT extract fields: 
+- certification_authority- certification authority
+- certificate_type- certificate type
+- certification_date_valid_from- certification date valid from 
+- certification_date_valid_to- certification date valid to
+- company_name - company name
+- company_address - company address
+- expiration_date - expiration date
+
+Export should be formatted as:
+EXPORT:
+{
+    "certification_authority": certification authority value
+    "certificate_type": certificate type value
+    "certification_date_valid_from": certification date valid from value
+    "certification_date_valid_to": certification date valid to value
+    "company_name": company name value
+    "company_address": company address value
+    "expiration_date": expiration date value
+}
+
+"""
+
 question_template = """
 QUESTION: {question}
 =========
@@ -853,6 +879,11 @@ class PromptTemplateCreator:
         # mapping = defaultdict(str, key_value_to_change)
         # prepared_prompt = template.format_map(mapping=mapping)
         return prepared_prompt
+
+
+    def get_document_data_prompt(self, document_content: str) -> str:
+        user_prompt = self.prepare_template(EXTRACT_CERTIFICATE_DATA_V1, document_content=document_content)
+        return user_prompt
 
 
     def get_title_extract_prompt(self, document_split: str) -> str:

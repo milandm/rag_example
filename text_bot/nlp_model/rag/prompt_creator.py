@@ -36,6 +36,13 @@ class PromptCreator:
         self.logger = UniversalLogger('./log_files/app.log', max_bytes=1048576, backup_count=3)
 
 
+    def extract_document_data_structured_output(self, documents_txt: str, structured_output_model: BaseModel):
+        document_data_prompt = self.prompt_template_creator.get_document_data_prompt(documents_txt)
+        document_data_openai_response = self.model.send_prompt_structured_output(SYSTEM_MSG_TITLE, document_data_prompt, structured_output_model)
+        document_data_content = document_data_openai_response.choices[0].message.parsed
+        return document_data_content
+
+
     def get_document_title(self, first_documents_split_txt: str):
         title_extract_prompt = self.prompt_template_creator.get_title_extract_prompt(first_documents_split_txt)
         document_title_openai_response = self.model.send_prompt(SYSTEM_MSG_TITLE, title_extract_prompt)

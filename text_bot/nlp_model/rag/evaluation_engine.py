@@ -2,6 +2,7 @@ import random
 import re
 from custom_logger.universal_logger import UniversalLogger
 from text_bot.nlp_model.replicate_model import ReplicateModel
+from text_bot.nlp_model.llm_structured_output_models.llama_masked_word_export import LlamaMaksedWordPrediction
 
 
 class EvaluationEngine:
@@ -35,7 +36,9 @@ class EvaluationEngine:
         prompt = f"Fill in the blank with a single word in Romani language: {masked_sentence}"
 
         # Generate prediction using the model
-        output = self.replicate_model.predict(prompt=prompt)
+        output = self.replicate_model.predict_structured_output(
+                                      user_prompt= prompt,
+                                      structured_output_model = LlamaMaksedWordPrediction)
 
         self.logger.info(f"predict_masked_word output: " + str(output))
 
@@ -50,7 +53,9 @@ class EvaluationEngine:
         prompt = f"Fill in the blank with a single word in Romani language:  {masked_sentence}"
 
         # Generate prediction using the model
-        output = self.replicate_model.predict(prompt=prompt)
+        output = self.replicate_model.predict_structured_output(
+                                      user_prompt= prompt,
+                                      structured_output_model = LlamaMaksedWordPrediction)
 
         self.logger.info(f"predict_masked_word output: " + str(output))
 
