@@ -11,10 +11,6 @@ class EvaluationEngine:
         self.logger = UniversalLogger('./log_files/app.log', max_bytes=1048576, backup_count=3)
         self.replicate_model = ReplicateModel()
 
-    def split_into_sentences(self, text):
-        sentences = re.split(r'(?<=[.!?]) +', text)
-        return sentences
-
 
     def create_cloze_test_samples(self, sentences, num_samples=100):
         samples = []
@@ -145,24 +141,3 @@ class EvaluationEngine:
         # Example usage:
         next_word_samples = self.create_next_word_prediction_samples(sentences, num_samples=50)
         self.evaluate_next_word_prediction(next_word_samples)
-
-
-    def do_all_evaluations(self, corpus_text):
-        # Split text into sentences
-        sentences = self.split_into_sentences(corpus_text)
-
-        # Cloze Test Evaluation
-        cloze_samples = self.create_cloze_test_samples(sentences, num_samples=50)
-        cloze_correct, cloze_total = self.evaluate_cloze_test(cloze_samples)
-
-        # Next Word Prediction Evaluation
-        next_word_samples = self.create_next_word_prediction_samples(sentences, num_samples=50)
-        next_word_correct, next_word_total = self.evaluate_next_word_prediction(next_word_samples)
-
-        # Return the results
-        return {
-            'cloze_correct': cloze_correct,
-            'cloze_total': cloze_total,
-            'next_word_correct': next_word_correct,
-            'next_word_total': next_word_total
-        }
