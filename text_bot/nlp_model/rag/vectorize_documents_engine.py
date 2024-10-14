@@ -29,8 +29,9 @@ from text_bot.nlp_model.rag.prompt_creator import PromptCreator
 from text_bot.nlp_model.mml_model import MmlModel
 from custom_logger.universal_logger import UniversalLogger
 from text_bot.nlp_model.rag.evaluation_engine import EvaluationEngine
-from langchain.text_splitter import SpacyTextSplitter
+# from langchain.text_splitter import SpacyTextSplitter
 
+SMALL_CHUNK_SIZE = 250
 
 MAX_CHUNK_SIZE = 500
 MAX_CHUNK_OVERLAP_SIZE = 250
@@ -54,8 +55,10 @@ class VectorizeDocumentsEngine:
         self.pages_splitter = RecursiveCharacterTextSplitter(chunk_size=MAX_PAGE_SIZE, chunk_overlap=0)
         self.markdown_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=HEADERS_TO_SPLIT_ON)
 
-        # Initialize the SpacyTextSplitter
-        self.splitter = SpacyTextSplitter()
+        # # Initialize the SpacyTextSplitter
+        # self.splitter = SpacyTextSplitter()
+
+        self.small_chunks_splitter = RecursiveCharacterTextSplitter(chunk_size=SMALL_CHUNK_SIZE, chunk_overlap=0)
 
         self.evaluation_engine = EvaluationEngine()
 
@@ -85,7 +88,7 @@ class VectorizeDocumentsEngine:
             document_pages_formatted = self.get_document_split_pages(document_pages)
 
             for document_page in document_pages_formatted:
-                sentences = self.splitter.split_text(document_page)
+                sentences = self.small_chunks_splitter.split_text(document_page.page_content)
 
                 # Cloze Test Evaluation
                 cloze_samples = self.evaluation_engine.create_cloze_test_samples(sentences, num_samples=50)
