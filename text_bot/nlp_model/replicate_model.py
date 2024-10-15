@@ -41,6 +41,8 @@ EMBEDDING_MODEL = 'all-MiniLM-L6-v2'
 # LLM_MODEL = "gpt-3.5-turbo"
 # LLM_MODEL = "gpt-4"
 LLM_MODEL_70 ="meta/meta-llama-3-70b"
+LLM_MODEL_70_INSTRUCT = "meta/meta-llama-3.1-70b-instruct"
+META_LLAMA_3_1_405b_INSTRUCT = "meta/meta-llama-3.1-405b-instruct"
 LLM_MODEL = "llama-3-1"
 LLM_MODEL_STRUCTURED_OUTPUT = "gpt-4o-2024-08-06"
 from pydantic import BaseModel
@@ -96,7 +98,7 @@ class ReplicateModel(NlpModel):
         }
 
         output = replicate.run(
-            "meta/meta-llama-3-70b",
+            META_LLAMA_3_1_405b_INSTRUCT,
             input=input
         )
         print("".join(output))
@@ -160,7 +162,7 @@ class ReplicateModel(NlpModel):
 
         try:
             prediction = replicate.predictions.create(
-                model="meta/meta-llama-3-70b",
+                model=META_LLAMA_3_1_405b_INSTRUCT,
                 input=input
             )
 
@@ -226,7 +228,7 @@ class ReplicateModel(NlpModel):
             user_prompt = user_prompt,
             structured_output_model = structured_output_model )
         self.logger.info("send_prompt_structured_output structured_prompt: " + str(structured_prompt))
-        output = self.predict(prompt=structured_prompt)
+        output = self.send_prompt(prompt=structured_prompt)
         return output
 
 
@@ -243,7 +245,11 @@ class ReplicateModel(NlpModel):
             user_prompt = user_prompt,
             structured_output_model = structured_output_model )
         self.logger.info("send_prompt_structured_output structured_prompt: "+str(structured_prompt))
-        output = self.predict(prompt=structured_prompt)
+        output = self.send_prompt(prompt=structured_prompt)
+
+        self.logger.info("send_prompt_structured_output output: " + str(output))
+        self.logger.info("send_prompt_structured_output output object type: " + str(type(output)))
+        self.logger.info("send_prompt_structured_output output result: " + str(output.result))
 
         if not isinstance(output, str):
             # output = json.dumps(output)
