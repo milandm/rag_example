@@ -18,6 +18,8 @@ from custom_logger.universal_logger import UniversalLogger
 
 from text_bot.nlp_model.rag.llama_structured_prompt_creator import LlamaStructuredPromptCreator, STRUCTURED_OUTPUT_SYSTEM_PROMPT
 
+import json
+
 # import replicate
 #
 # input = {
@@ -42,6 +44,8 @@ LLM_MODEL_70 ="meta/meta-llama-3-70b"
 LLM_MODEL = "llama-3-1"
 LLM_MODEL_STRUCTURED_OUTPUT = "gpt-4o-2024-08-06"
 from pydantic import BaseModel
+from langchain.output_parsers import PydanticOutputParser
+
 
 
 class ReplicateModel(NlpModel):
@@ -53,6 +57,7 @@ class ReplicateModel(NlpModel):
         # Initialize the embeddings model
         self.embedding_model = SentenceTransformer(EMBEDDING_MODEL)
         self.llama_structured_prompt_creator = LlamaStructuredPromptCreator()
+
         # Get the latest version of the model
         # self.model = replicate.models.get(self.model_name)
         # self.version = self.model.versions.list()[0]
@@ -220,6 +225,7 @@ class ReplicateModel(NlpModel):
             system_msg = system_msg,
             user_prompt = user_prompt,
             structured_output_model = structured_output_model )
+        self.logger.info("send_prompt_structured_output structured_prompt: " + str(structured_prompt))
         output = self.predict(prompt=structured_prompt)
         return output
 
@@ -228,9 +234,22 @@ class ReplicateModel(NlpModel):
                                       user_prompt: str = "",
                                       structured_output_model: BaseModel = None):
         self.logger.info("send_prompt_structured_output")
+
+        # Define the parser using the Pydantic model we defined earlier
+        self.output_parser = PydanticOutputParser(pydantic_object=structured_output_model)
+
         structured_prompt = self.llama_structured_prompt_creator.get_generate_json_structured_output_prompt(
             system_msg = system_msg,
             user_prompt = user_prompt,
             structured_output_model = structured_output_model )
+        self.logger.info("send_prompt_structured_output structured_prompt: "+str(structured_prompt))
         output = self.predict(prompt=structured_prompt)
+
+        if not isinstance(output, str):
+            # output = json.dumps(output)
+            try:
+                output = self.output_parser.parse(output)
+            except Exception as e:
+                print(f"Failed to parse output: {e}")
+
         return output

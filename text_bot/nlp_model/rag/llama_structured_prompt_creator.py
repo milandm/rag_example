@@ -29,7 +29,7 @@ class LlamaStructuredPromptCreator:
                                                   system_msg: str = STRUCTURED_OUTPUT_SYSTEM_PROMPT,
                                                   user_prompt: str = "",
                                                   structured_output_model: BaseModel = None):
-        schema = json.dumps(structured_output_model.model_json_schema())
+        schema = json.dumps(structured_output_model.model_json_schema().get("required", None))
 
         prompt = f"""
         <|begin_of_text|><|start_header_id|>system<|end_header_id|>
