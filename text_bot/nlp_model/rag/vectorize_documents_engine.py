@@ -90,15 +90,6 @@ class VectorizeDocumentsEngine:
             for document_page in document_pages_formatted:
                 content = document_page.page_content
 
-#                 content = """To evaluate the performance of Reflection Llama 3.1, I tested the model using a variety of prompts.
-#
-# Numerical Reasoning with Financial Data
-# Reflection Llama 3.1 handled a financial prompt effectively, accurately calculating and comparing the cumulative returns for UPS and the S&P 500 Index over a five-year period.
-#
-# In the <thinking> phase, the model correctly calculated returns of -24.05% for UPS and 2.11% for the S&P 500. However, in the <reflection> phase, it flagged an error in its own calculations, even though they were actually correct. Although it eventually recognised the right answer, this self-correction behaviour seemed unusual.
-#
-# Despite this quirk, the final output provided a clear explanation of the results, showcasing the model’s ability to accurately handle numerical reasoning tasks."""
-
                 small_chunks = self.small_chunks_splitter.split_text(content)
 
                 for text_chunk in small_chunks:
@@ -108,26 +99,16 @@ class VectorizeDocumentsEngine:
                     predicted_words = [predicted_word["word"] for predicted_word in predicted_words]
                     cloze_correct, cloze_total = self.evaluation_engine.evaluate_cloze_test(masked_words, predicted_words)
 
-                    # # Next Word Prediction Evaluation
-                    # next_word_samples = self.evaluation_engine.create_next_word_prediction_samples(small_chunks, num_samples=5)
-                    # next_word_correct, next_word_total = self.evaluation_engine.evaluate_next_word_prediction(next_word_samples)
 
                     # Update accumulators
                     total_cloze_correct += cloze_correct
                     total_cloze_total += cloze_total
-                    # total_next_word_correct += next_word_correct
-                    # total_next_word_total += next_word_total
-
 
         # Calculate overall accuracies
         overall_cloze_accuracy = (total_cloze_correct / total_cloze_total) * 100 if total_cloze_total > 0 else 0
-        overall_next_word_accuracy = (
-                                                 total_next_word_correct / total_next_word_total) * 100 if total_next_word_total > 0 else 0
 
         # Log the overall accuracies
         self.logger.info(f"Overall Cloze Test Accuracy across all documents: {overall_cloze_accuracy:.2f}%")
-        self.logger.info(
-            f"Overall Next Word Prediction Accuracy across all documents: {overall_next_word_accuracy:.2f}%")
 
 
 
