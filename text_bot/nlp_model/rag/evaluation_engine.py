@@ -92,7 +92,18 @@ class EvaluationEngine:
                                       structured_output_model = LlamaMaksedWordPrediction)
 
         self.logger.info(f"predict_masked_word output: " + str(output))
-        output_json = json.loads(output)
+
+        # Check if the output is not None or empty
+        if not output or output.strip() == "":
+            self.logger.error("The model output is empty or invalid.")
+            raise ValueError("The model output is empty or invalid.")  # Raise an error to retry
+
+        try:
+            output_json = json.loads(output)
+        except json.decoder.JSONDecodeError as e:
+            self.logger.error(f"JSON decoding failed: {e}")
+            raise  # This will trigger the retry
+
         return output_json
 
 
