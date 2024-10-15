@@ -99,13 +99,15 @@ class EvaluationEngine:
     def evaluate_cloze_test(self, masked_words, predicted_words):
         correct = 0
         total = len(masked_words)
+        masked_predicted = dict()
         for idx, masked_word in enumerate(masked_words):
             predicted_word = predicted_words[idx]
             if masked_word.lower() == predicted_word.lower():
                 correct += 1
+            masked_predicted[masked_word] = predicted_word
         accuracy = correct / total * 100
         self.logger.info(f"Cloze Test Accuracy: {accuracy:.2f}%")
-        return correct, total
+        return correct, total, masked_predicted
 
 
 

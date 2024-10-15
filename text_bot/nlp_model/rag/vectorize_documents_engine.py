@@ -84,6 +84,8 @@ class VectorizeDocumentsEngine:
         total_next_word_correct = 0
         total_next_word_total = 0
 
+        masked_predicted_list = list()
+
         for document_pages in documents:
             document_pages_formatted = self.get_document_split_pages(document_pages)
 
@@ -97,8 +99,9 @@ class VectorizeDocumentsEngine:
                     cloze_sample, masked_words = self.evaluation_engine.create_cloze_test_samples(text_chunk)
                     predicted_words = self.evaluation_engine.predict_masked_words(cloze_sample)
                     predicted_words = [predicted_word["word"] for predicted_word in predicted_words]
-                    cloze_correct, cloze_total = self.evaluation_engine.evaluate_cloze_test(masked_words, predicted_words)
+                    cloze_correct, cloze_total, masked_predicted = self.evaluation_engine.evaluate_cloze_test(masked_words, predicted_words)
 
+                    masked_predicted_list.append(masked_predicted)
 
                     # Update accumulators
                     total_cloze_correct += cloze_correct
@@ -109,6 +112,8 @@ class VectorizeDocumentsEngine:
 
         # Log the overall accuracies
         self.logger.info(f"Overall Cloze Test Accuracy across all documents: {overall_cloze_accuracy:.2f}%")
+        self.logger.info(f"masked_predicted_list across all documents: {masked_predicted_list}")
+
 
 
 
