@@ -249,7 +249,6 @@ class ReplicateModel(NlpModel):
 
         self.logger.info("send_prompt_structured_output output: " + str(output))
         self.logger.info("send_prompt_structured_output output object type: " + str(type(output)))
-        self.logger.info("send_prompt_structured_output output result: " + str(output.result))
 
         if not isinstance(output, str):
             # output = json.dumps(output)

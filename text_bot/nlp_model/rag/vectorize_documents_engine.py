@@ -90,14 +90,14 @@ class VectorizeDocumentsEngine:
             for document_page in document_pages_formatted:
                 content = document_page.page_content
 
-                content = """To evaluate the performance of Reflection Llama 3.1, I tested the model using a variety of prompts.
-
-Numerical Reasoning with Financial Data
-Reflection Llama 3.1 handled a financial prompt effectively, accurately calculating and comparing the cumulative returns for UPS and the S&P 500 Index over a five-year period.
-
-In the <thinking> phase, the model correctly calculated returns of -24.05% for UPS and 2.11% for the S&P 500. However, in the <reflection> phase, it flagged an error in its own calculations, even though they were actually correct. Although it eventually recognised the right answer, this self-correction behaviour seemed unusual.
-
-Despite this quirk, the final output provided a clear explanation of the results, showcasing the model’s ability to accurately handle numerical reasoning tasks."""
+#                 content = """To evaluate the performance of Reflection Llama 3.1, I tested the model using a variety of prompts.
+#
+# Numerical Reasoning with Financial Data
+# Reflection Llama 3.1 handled a financial prompt effectively, accurately calculating and comparing the cumulative returns for UPS and the S&P 500 Index over a five-year period.
+#
+# In the <thinking> phase, the model correctly calculated returns of -24.05% for UPS and 2.11% for the S&P 500. However, in the <reflection> phase, it flagged an error in its own calculations, even though they were actually correct. Although it eventually recognised the right answer, this self-correction behaviour seemed unusual.
+#
+# Despite this quirk, the final output provided a clear explanation of the results, showcasing the model’s ability to accurately handle numerical reasoning tasks."""
 
                 sentences = self.small_chunks_splitter.split_text(content)
 

@@ -29,7 +29,7 @@ class EvaluationEngine:
     def predict_masked_word_v1(self, masked_sentence):
         self.logger.info(f"masked_sentence: " + masked_sentence)
         # Prepare the prompt for Llama 3.1
-        prompt = f"Return just single word in Romani language that should be logical replacement for [MASK] in given context: {masked_sentence}"
+        prompt = f"Return just words in Romani language that should be logical replacement for [MASK] in given context: {masked_sentence}"
 
         # Generate prediction using the model
         output = self.replicate_model.predict_structured_output(
@@ -46,7 +46,7 @@ class EvaluationEngine:
     def predict_masked_word(self, masked_sentence):
         self.logger.info(f"masked_sentence: " + masked_sentence)
         # Prepare the prompt for Llama 3.1
-        prompt = f"Return just single word in Romani language that should be logical replacement for [MASK] in given context:  {masked_sentence}"
+        prompt = f"Return just words in Romani language that should be logical replacement for [MASK] in given context:  {masked_sentence}"
 
         self.logger.info(f"predict_masked_word prompt: " + str(prompt))
 
