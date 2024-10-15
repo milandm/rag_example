@@ -4,6 +4,7 @@ from custom_logger.universal_logger import UniversalLogger
 from text_bot.nlp_model.replicate_model import ReplicateModel
 from text_bot.nlp_model.llm_structured_output_models.llama_masked_word_export import LlamaMaksedWordPrediction
 import json
+from text_bot.utils import retry
 
 class EvaluationEngine:
 
@@ -59,12 +60,12 @@ class EvaluationEngine:
 
         self.logger.info(f"predict_masked_word prompt: " + str(prompt))
 
-        # Generate prediction using the model
-        output = self.replicate_model.predict_structured_output(
-                                      user_prompt= prompt,
-                                      structured_output_model = LlamaMaksedWordPrediction)
-
-        self.logger.info(f"predict_masked_word output: " + str(output))
+        # # Generate prediction using the model
+        # output = self.replicate_model.predict_structured_output(
+        #                               user_prompt= prompt,
+        #                               structured_output_model = LlamaMaksedWordPrediction)
+        #
+        # self.logger.info(f"predict_masked_word output: " + str(output))
 
         # # Handle the case where output is a list
         # if isinstance(output, list):
@@ -79,8 +80,19 @@ class EvaluationEngine:
         #     # Extract the predicted word from the model's output
         #     predicted_word = output_text.strip().split()[0]
 
-        output_json = json.loads(output)
+        output_json = self.get_prediction_json(prompt)
+        return output_json
 
+
+    @retry(max_retries=3, initial_delay=1, backoff=2)
+    def get_prediction_json(self, prompt):
+        # Generate prediction using the model
+        output = self.replicate_model.predict_structured_output(
+                                      user_prompt= prompt,
+                                      structured_output_model = LlamaMaksedWordPrediction)
+
+        self.logger.info(f"predict_masked_word output: " + str(output))
+        output_json = json.loads(output)
         return output_json
 
 

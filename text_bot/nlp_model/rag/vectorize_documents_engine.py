@@ -101,20 +101,22 @@ class VectorizeDocumentsEngine:
 
                 small_chunks = self.small_chunks_splitter.split_text(content)
 
-                # Cloze Test Evaluation
-                cloze_sample, masked_words = self.evaluation_engine.create_cloze_test_samples(small_chunks)
-                predicted_words = self.evaluation_engine.predict_masked_words(cloze_sample)
-                cloze_correct, cloze_total = self.evaluation_engine.evaluate_cloze_test(masked_words, predicted_words)
+                for text_chunk in small_chunks:
+                    # Cloze Test Evaluation
+                    cloze_sample, masked_words = self.evaluation_engine.create_cloze_test_samples(text_chunk)
+                    predicted_words = self.evaluation_engine.predict_masked_words(cloze_sample)
+                    predicted_words = [predicted_word["word"] for predicted_word in predicted_words]
+                    cloze_correct, cloze_total = self.evaluation_engine.evaluate_cloze_test(masked_words, predicted_words)
 
-                # Next Word Prediction Evaluation
-                next_word_samples = self.evaluation_engine.create_next_word_prediction_samples(small_chunks, num_samples=5)
-                next_word_correct, next_word_total = self.evaluation_engine.evaluate_next_word_prediction(next_word_samples)
+                    # # Next Word Prediction Evaluation
+                    # next_word_samples = self.evaluation_engine.create_next_word_prediction_samples(small_chunks, num_samples=5)
+                    # next_word_correct, next_word_total = self.evaluation_engine.evaluate_next_word_prediction(next_word_samples)
 
-                # Update accumulators
-                total_cloze_correct += cloze_correct
-                total_cloze_total += cloze_total
-                total_next_word_correct += next_word_correct
-                total_next_word_total += next_word_total
+                    # Update accumulators
+                    total_cloze_correct += cloze_correct
+                    total_cloze_total += cloze_total
+                    # total_next_word_correct += next_word_correct
+                    # total_next_word_total += next_word_total
 
 
         # Calculate overall accuracies
