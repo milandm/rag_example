@@ -99,14 +99,15 @@ class VectorizeDocumentsEngine:
 #
 # Despite this quirk, the final output provided a clear explanation of the results, showcasing the model’s ability to accurately handle numerical reasoning tasks."""
 
-                sentences = self.small_chunks_splitter.split_text(content)
+                small_chunks = self.small_chunks_splitter.split_text(content)
 
                 # Cloze Test Evaluation
-                cloze_samples = self.evaluation_engine.create_cloze_test_samples(sentences, num_samples=50)
-                cloze_correct, cloze_total = self.evaluation_engine.evaluate_cloze_test(cloze_samples)
+                cloze_sample, masked_words = self.evaluation_engine.create_cloze_test_samples(small_chunks)
+                predicted_words = self.evaluation_engine.predict_masked_words(cloze_sample)
+                cloze_correct, cloze_total = self.evaluation_engine.evaluate_cloze_test(masked_words, predicted_words)
 
                 # Next Word Prediction Evaluation
-                next_word_samples = self.evaluation_engine.create_next_word_prediction_samples(sentences, num_samples=50)
+                next_word_samples = self.evaluation_engine.create_next_word_prediction_samples(small_chunks, num_samples=5)
                 next_word_correct, next_word_total = self.evaluation_engine.evaluate_next_word_prediction(next_word_samples)
 
                 # Update accumulators

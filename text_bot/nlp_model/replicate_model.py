@@ -101,7 +101,8 @@ class ReplicateModel(NlpModel):
             META_LLAMA_3_1_405b_INSTRUCT,
             input=input
         )
-        print("".join(output))
+        output = "".join(output)
+        self.logger.info("send_prompt: "+output)
         return output
 
 
@@ -245,6 +246,7 @@ class ReplicateModel(NlpModel):
             user_prompt = user_prompt,
             structured_output_model = structured_output_model )
         self.logger.info("send_prompt_structured_output structured_prompt: "+str(structured_prompt))
+        self.logger.info("PROMPT END ")
         output = self.send_prompt(prompt=structured_prompt)
 
         self.logger.info("send_prompt_structured_output output: " + str(output))

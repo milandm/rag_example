@@ -70,7 +70,7 @@ class LlamaStructuredPromptCreator:
 # probati srpski
 # probati engleski
 
-    def get_generate_json_structured_output_prompt(self,
+    def get_generate_json_structured_output_prompt_v2(self,
                                                    system_msg: str = STRUCTURED_OUTPUT_SYSTEM_PROMPT,
                                                    user_prompt: str = "",
                                                    structured_output_model: BaseModel = None):
@@ -105,7 +105,7 @@ class LlamaStructuredPromptCreator:
         Make sure to return ONLY an instance of the JSON, NOT the schema itself. 
         Do not add any additional information.
         JSON schema:
-        {$schema}
+        $schema
 
         Task: $user_prompt<|eot_id|><|start_header_id|>assistant<|end_header_id|>
         """
@@ -113,6 +113,41 @@ class LlamaStructuredPromptCreator:
         user_prompt = self.prepare_template(LLAMA_JSON_STRUCTURED_OUTPUT, system_msg=system_msg, schema=schema,user_prompt=user_prompt )
 
         return user_prompt
+
+    def get_generate_json_structured_output_prompt(self,
+                                                   system_msg: str = STRUCTURED_OUTPUT_SYSTEM_PROMPT,
+                                                   user_prompt: str = "",
+                                                   structured_output_model: BaseModel = None):
+
+        LLAMA_JSON_STRUCTURED_OUTPUT = """
+        <|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+        $system_msg<|eot_id|>
+
+        <|start_header_id|>user<|end_header_id|>
+        Make sure to return ONLY an instance of the JSON, NOT the schema itself. 
+        Do not add any additional information.
+        
+        JSON schema:
+        [
+          {
+            "language": "Romani",
+            "word": "Džavipen"
+          },
+          {
+            "language": "Romani",
+            "word": "bajrarikeribaskoro"
+          },...]
+
+
+        Task: $user_prompt<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+        """
+
+        user_prompt = self.prepare_template(LLAMA_JSON_STRUCTURED_OUTPUT, system_msg=system_msg,
+                                            user_prompt=user_prompt)
+
+        return user_prompt
+
 
 
     def prepare_template(self, template: str, **kwargs) -> str:
