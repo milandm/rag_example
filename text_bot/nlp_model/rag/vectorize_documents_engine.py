@@ -112,6 +112,7 @@ class VectorizeDocumentsEngine:
 
 
 
+
     def load_documents_to_db_1(self):
         documents = load_documents("documents/")
         for document_pages in documents:

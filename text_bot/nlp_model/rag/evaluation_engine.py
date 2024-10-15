@@ -84,7 +84,7 @@ class EvaluationEngine:
         return output_json
 
 
-    @retry(max_retries=3, initial_delay=1, backoff=2)
+    @retry(max_retries=3, initial_delay=1, backoff=2, exceptions=(Exception, json.decoder.JSONDecodeError))
     def get_prediction_json(self, prompt):
         # Generate prediction using the model
         output = self.replicate_model.predict_structured_output(
