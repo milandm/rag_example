@@ -98,13 +98,67 @@ class EvaluationEngine:
             self.logger.error("The model output is empty or invalid.")
             raise ValueError("The model output is empty or invalid.")  # Raise an error to retry
 
+        output_json = None
         try:
             output_json = json.loads(output)
         except json.decoder.JSONDecodeError as e:
             self.logger.error(f"JSON decoding failed: {e}")
-            raise  # This will trigger the retry
+
+        if not output_json:
+            try:
+                output_json = self.load_fixed_json(output)
+            except json.decoder.JSONDecodeError as e:
+                self.logger.error(f"JSON decoding failed: {e}")
+                raise  # This will trigger the retry
 
         return output_json
+
+
+    def load_fixed_json(self, json_string):
+        try:
+            # Try loading the raw JSON
+            return json.loads(json_string)
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON: {e}")
+
+            # First, ensure the string ends with proper closing braces/brackets
+            json_string = json_string.strip()
+            if not json_string.endswith(']'):
+                json_string = json_string.rstrip(',') + ']'
+            if not json_string.endswith('}]'):
+                json_string = json_string.rstrip(',') + '}]'
+
+            # Find the last dictionary in the JSON string
+            last_open_bracket = json_string.rfind('{')
+            last_close_bracket = json_string.rfind('}')
+
+            # If we have a valid start of a dictionary
+            if last_open_bracket != -1 and last_close_bracket != -1 and last_close_bracket > last_open_bracket:
+                last_dict_str = json_string[last_open_bracket:last_close_bracket + 1]
+                try:
+                    # Try to parse the last dictionary to check its integrity
+                    last_dict = json.loads(last_dict_str)
+
+                    # Check if "word" is complete and valid
+                    if "word" in last_dict and isinstance(last_dict["word"], str):
+                        last_word = last_dict["word"].strip()
+
+                        # If the last word is incomplete (e.g., ends abruptly)
+                        if last_word.endswith(',') or not last_word[-1].isalpha():
+                            print("The last 'word' is incomplete, removing the last dictionary.")
+                            json_string = json_string[:last_open_bracket] + ']'
+                except json.JSONDecodeError:
+                    print("Failed to parse the last dictionary, removing it.")
+                    json_string = json_string[:last_open_bracket] + ']'
+            else:
+                print("Malformed JSON, removing the last entry.")
+
+            try:
+                # Try loading the fixed JSON string
+                return json.loads(json_string)
+            except json.JSONDecodeError as e:
+                print(f"Still unable to decode JSON: {e}")
+                raise
 
 
     def evaluate_cloze_test(self, masked_words, predicted_words):
