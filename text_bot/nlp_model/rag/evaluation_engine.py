@@ -17,14 +17,14 @@ class EvaluationEngine:
         self.llama_structured_prompt_creator = LlamaStructuredPromptCreator()
 
 
-    def create_cloze_test_samples(self, text_chunk, num_masks=1):
+    def create_cloze_test_samples(self, text_chunk, num_masks=3):
         words = text_chunk.split()  # Split the text chunk into words
         words_copy = words[:]  # Make a copy of the original word list
         masked_words = []
 
         # Randomly select indices to mask
         mask_indices = random.sample(range(len(words_copy)), min(num_masks, len(words_copy)))
-        self.logger.info(f"create_cloze_test_samples mask_indices: " + mask_indices)
+        self.logger.info(f"create_cloze_test_samples mask_indices: " + str(mask_indices))
 
         for mask_idx in mask_indices:
             masked_word = words_copy[mask_idx]

@@ -31,7 +31,7 @@ from custom_logger.universal_logger import UniversalLogger
 from text_bot.nlp_model.rag.evaluation_engine import EvaluationEngine
 # from langchain.text_splitter import SpacyTextSplitter
 
-SMALL_CHUNK_SIZE = 250
+SMALL_CHUNK_SIZE = 500
 
 MAX_CHUNK_SIZE = 500
 MAX_CHUNK_OVERLAP_SIZE = 250
