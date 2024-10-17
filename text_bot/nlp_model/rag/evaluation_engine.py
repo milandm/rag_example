@@ -122,17 +122,32 @@ class EvaluationEngine:
             json_string = json_string + ']'
 
         elif last_char == '"':
+            json_string = json_string + ']}]'
+
+        elif json_string.endswith(']') and not json_string.endswith(']}]'):
             json_string = json_string + '}]'
 
         elif json_string.endswith('",'):
-            json_string = json_string[:-1] + '}]'
+            json_string = json_string[:-1] + ']}]'
 
         elif json_string.endswith('},'):
             json_string = json_string[:-1] + ']'
 
+        elif json_string.endswith(',{"'):
+            json_string = json_string[:-3] + ']'
+
+        elif json_string.endswith('{"'):
+            json_string = json_string[:-2] + ']'
+
+        elif json_string.endswith(',{'):
+            json_string = json_string[:-2] + ']'
+
         else:
-            json_string = self.get_substring_before_last_occurrence(json_string, ',{')
-            json_string = json_string + ']'
+            json_string_new = self.get_substring_before_last_occurrence(json_string, ',"')
+            if json_string_new == json_string:
+                json_string = self.get_substring_before_last_occurrence(json_string, '{"')
+            else:
+                json_string = json_string_new
 
         json_output = self.get_json_output(json_string)
         if json_output:
