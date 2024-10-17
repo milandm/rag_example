@@ -24,6 +24,7 @@ class EvaluationEngine:
 
         # Randomly select indices to mask
         mask_indices = random.sample(range(len(words_copy)), min(num_masks, len(words_copy)))
+        self.logger.info(f"create_cloze_test_samples mask_indices: " + mask_indices)
 
         for mask_idx in mask_indices:
             masked_word = words_copy[mask_idx]
