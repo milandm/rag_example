@@ -17,7 +17,7 @@ class EvaluationEngine:
         self.llama_structured_prompt_creator = LlamaStructuredPromptCreator()
 
 
-    def create_cloze_test_samples(self, text_chunk, num_masks=4):
+    def create_cloze_test_samples(self, text_chunk, num_masks=1):
         words = text_chunk.split()  # Split the text chunk into words
         words_copy = words[:]  # Make a copy of the original word list
         masked_words = []
@@ -37,11 +37,6 @@ class EvaluationEngine:
 
     def predict_masked_word_v1(self, masked_sentence):
         self.logger.info(f"masked_sentence: " + masked_sentence)
-        # Prepare the prompt for Llama 3.1
-        # prompt = f"""
-        # Please create export as json format list containing words in Romani language
-        # that should replace [MASK] words:  {masked_sentence}"""
-        # # prompt = f"Return just words in Romani language that should be logical replacement for [MASK] in given context: {masked_sentence}"
 
         prompt = self.llama_structured_prompt_creator.get_masking_prompt(masked_sentence)
 
@@ -59,35 +54,10 @@ class EvaluationEngine:
 
     def predict_masked_words(self, masked_sentence):
         self.logger.info(f"masked_sentence: " + masked_sentence)
-        # # Prepare the prompt for Llama 3.1
-        # prompt = f"""
-        # Please create export as json format list containing words in Romani language
-        # that should replace [MASK] words:  {masked_sentence}"""
-        # # prompt = f"Return just words in Romani language that should be logical replacement for [MASK] in given context:  {masked_sentence}"
 
         prompt = self.llama_structured_prompt_creator.get_masking_prompt(masked_sentence)
 
         self.logger.info(f"predict_masked_word prompt: " + str(prompt))
-
-        # # Generate prediction using the model
-        # output = self.replicate_model.predict_structured_output(
-        #                               user_prompt= prompt,
-        #                               structured_output_model = LlamaMaksedWordPrediction)
-        #
-        # self.logger.info(f"predict_masked_word output: " + str(output))
-
-        # # Handle the case where output is a list
-        # if isinstance(output, list):
-        #     output_text = ''.join(output)
-        # elif isinstance(output, str):
-        #     output_text = output
-        # else:
-        #     raise TypeError(f"Unexpected type for output: {type(output)}")
-
-        # predicted_word = ""
-        # if output_text and output_text.strip().split():
-        #     # Extract the predicted word from the model's output
-        #     predicted_word = output_text.strip().split()[0]
 
         output_json = self.get_prediction_json(prompt)
         return output_json
@@ -122,8 +92,55 @@ class EvaluationEngine:
 
         return output_json
 
+    def get_json_output(self, json_string):
+        json_output = None
+        try:
+            # Try loading the raw JSON
+            json_output = json.loads(json_string)
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON: {e}")
+
+        return json_output
+
+    def get_substring_before_last_occurrence(self, whole_string, sub):
+        index = whole_string.rfind(sub)
+        if index != -1:
+            return whole_string[:index]
+        else:
+            return whole_string
 
     def load_fixed_json(self, json_string):
+
+        json_output = self.get_json_output(json_string)
+        if json_output:
+            return json_output
+
+        json_string = json_string.strip()
+        last_char = json_string[-1]
+
+        if last_char == '}':
+            json_string = json_string + ']'
+
+        elif last_char == '"':
+            json_string = json_string + '}]'
+
+        elif json_string.endswith('",'):
+            json_string = json_string[:-1] + '}]'
+
+        elif json_string.endswith('},'):
+            json_string = json_string[:-1] + ']'
+
+        else:
+            json_string = self.get_substring_before_last_occurrence(json_string, ',{')
+            json_string = json_string + ']'
+
+        json_output = self.get_json_output(json_string)
+        if json_output:
+            return json_output
+
+
+
+    def load_fixed_json_v1(self, json_string):
         try:
             # Try loading the raw JSON
             return json.loads(json_string)
@@ -174,13 +191,19 @@ class EvaluationEngine:
 
         predicted_candidates_list = [predicted_word["words_list"] for predicted_word in predicted_words_list]
 
+        self.logger.info("evaluate_cloze_test predicted_candidates_list: "+str(predicted_candidates_list))
+        self.logger.info("evaluate_cloze_test masked_words: " + str(masked_words))
+
         correct = 0
         total = len(masked_words)
         masked_predicted = dict()
         for idx, masked_word in enumerate(masked_words):
-            predicted_top_candidates_lower_list = [predicted_candidate.lower() for predicted_candidate in predicted_candidates_list[idx]]
-            if masked_word.lower() in predicted_top_candidates_lower_list:
-                correct += 1
+            predicted_top_candidates_lower_list = list()
+            if idx < len(predicted_candidates_list):
+                predicted_top_candidates_lower_list = [predicted_candidate.lower()
+                                                       for predicted_candidate in predicted_candidates_list[idx]]
+                if masked_word.lower() in predicted_top_candidates_lower_list:
+                    correct += 1
             masked_predicted[masked_word] = predicted_top_candidates_lower_list
         accuracy = correct / total * 100
         self.logger.info(f"Cloze Test Accuracy: {accuracy:.2f}%")
@@ -205,22 +228,6 @@ class EvaluationEngine:
         # Prepare the prompt for Llama 3.1
         prompt = f"{prompt}"
 
-        # Generate prediction using the model
-        # output = self.replicate_model.predict(prompt=prompt)
-
-        # # Handle the case where output is a list
-        # if isinstance(output, list):
-        #     output_text = ''.join(output)
-        # elif isinstance(output, str):
-        #     output_text = output
-        # else:
-        #     raise TypeError(f"Unexpected type for output: {type(output)}")
-        #
-        # predicted_word = ""
-        # if output_text and output_text.strip().split():
-        #     # Extract the predicted word from the model's output
-        #     predicted_word = output_text.strip().split()[0]
-
         self.logger.info(f"predict_masked_word prompt: " + str(prompt))
 
         # Generate prediction using the model
@@ -229,19 +236,6 @@ class EvaluationEngine:
                                       structured_output_model = LlamaMaksedWordPrediction)
 
         self.logger.info(f"predict_masked_word output: " + str(output))
-
-        # # Handle the case where output is a list
-        # if isinstance(output, list):
-        #     output_text = ''.join(output)
-        # elif isinstance(output, str):
-        #     output_text = output
-        # else:
-        #     raise TypeError(f"Unexpected type for output: {type(output)}")
-
-        # predicted_word = ""
-        # if output_text and output_text.strip().split():
-        #     # Extract the predicted word from the model's output
-        #     predicted_word = output_text.strip().split()[0]
 
         output_json = json.loads(output)
 
