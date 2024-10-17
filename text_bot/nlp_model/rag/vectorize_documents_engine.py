@@ -97,9 +97,9 @@ class VectorizeDocumentsEngine:
                 for text_chunk in small_chunks:
                     # Cloze Test Evaluation
                     cloze_sample, masked_words = self.evaluation_engine.create_cloze_test_samples(text_chunk)
-                    predicted_words = self.evaluation_engine.predict_masked_words(cloze_sample)
-                    predicted_words = [predicted_word["word"] for predicted_word in predicted_words]
-                    cloze_correct, cloze_total, masked_predicted = self.evaluation_engine.evaluate_cloze_test(masked_words, predicted_words)
+                    predicted_words_list = self.evaluation_engine.predict_masked_words(cloze_sample)
+
+                    cloze_correct, cloze_total, masked_predicted = self.evaluation_engine.evaluate_cloze_test(masked_words, predicted_words_list)
 
                     masked_predicted_list.append(masked_predicted)
 
@@ -113,8 +113,6 @@ class VectorizeDocumentsEngine:
         # Log the overall accuracies
         self.logger.info(f"Overall Cloze Test Accuracy across all documents: {overall_cloze_accuracy:.2f}%")
         self.logger.info(f"masked_predicted_list across all documents: {masked_predicted_list}")
-
-
 
 
 

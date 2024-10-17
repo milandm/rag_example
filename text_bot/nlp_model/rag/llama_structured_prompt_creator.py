@@ -114,7 +114,7 @@ class LlamaStructuredPromptCreator:
 
         return user_prompt
 
-    def get_generate_json_structured_output_prompt(self,
+    def get_generate_json_structured_output_prompt_v3(self,
                                                    system_msg: str = STRUCTURED_OUTPUT_SYSTEM_PROMPT,
                                                    user_prompt: str = "",
                                                    structured_output_model: BaseModel = None):
@@ -127,7 +127,7 @@ class LlamaStructuredPromptCreator:
         <|start_header_id|>user<|end_header_id|>
         Make sure to return ONLY an instance of the JSON, NOT the schema itself. 
         Do not add any additional information.
-        
+
         JSON schema:
         [
           {
@@ -148,6 +148,55 @@ class LlamaStructuredPromptCreator:
 
         return user_prompt
 
+
+
+    def get_generate_json_structured_output_prompt(self,
+                                                   system_msg: str = STRUCTURED_OUTPUT_SYSTEM_PROMPT,
+                                                   user_prompt: str = "",
+                                                   structured_output_model: BaseModel = None):
+
+        LLAMA_JSON_STRUCTURED_OUTPUT = """
+        <|begin_of_text|><|start_header_id|>system<|end_header_id|>
+
+        $system_msg<|eot_id|>
+
+        <|start_header_id|>user<|end_header_id|>
+        Make sure to return ONLY an instance of the JSON, NOT the schema itself. 
+        Do not add any additional information.
+        
+        JSON schema:
+        [
+          {
+            "language": "Romani",
+            "words_list": ["Džavipen", ...]
+          },
+          {
+            "language": "Romani",
+            "words_list": ["bajrarikeribaskoro, ..."]
+          },...]
+
+
+        Task: $user_prompt<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+        """
+
+        user_prompt = self.prepare_template(LLAMA_JSON_STRUCTURED_OUTPUT, system_msg=system_msg,
+                                            user_prompt=user_prompt)
+
+        return user_prompt
+
+
+    def get_masking_prompt(self, masked_sentence):
+
+        # prompt = f"""
+        # Please create export as json format list containing words in Romani language
+        # that should replace [MASK] words:  {masked_sentence}"""
+
+        prompt = f"""
+        Please create export as json format list containing words in Romani language
+        that should replace [MASK] words. For every single masked word, please provide
+        list of TOP 5 candidate words that can replace [MASK]:  
+        {masked_sentence}"""
+        return prompt
 
 
     def prepare_template(self, template: str, **kwargs) -> str:

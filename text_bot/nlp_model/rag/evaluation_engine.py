@@ -5,12 +5,17 @@ from text_bot.nlp_model.replicate_model import ReplicateModel
 from text_bot.nlp_model.llm_structured_output_models.llama_masked_word_export import LlamaMaksedWordPrediction
 import json
 from text_bot.utils import retry
+from text_bot.nlp_model.rag.llama_structured_prompt_creator import LlamaStructuredPromptCreator, STRUCTURED_OUTPUT_SYSTEM_PROMPT
+
+
 
 class EvaluationEngine:
 
     def __init__(self):
         self.logger = UniversalLogger('./log_files/app.log', max_bytes=1048576, backup_count=3)
         self.replicate_model = ReplicateModel()
+        self.llama_structured_prompt_creator = LlamaStructuredPromptCreator()
+
 
     def create_cloze_test_samples(self, text_chunk, num_masks=4):
         words = text_chunk.split()  # Split the text chunk into words
@@ -33,10 +38,12 @@ class EvaluationEngine:
     def predict_masked_word_v1(self, masked_sentence):
         self.logger.info(f"masked_sentence: " + masked_sentence)
         # Prepare the prompt for Llama 3.1
-        prompt = f"""
-        Please create export as json format list containing words in Romani language
-        that should replace [MASK] words:  {masked_sentence}"""
-        # prompt = f"Return just words in Romani language that should be logical replacement for [MASK] in given context: {masked_sentence}"
+        # prompt = f"""
+        # Please create export as json format list containing words in Romani language
+        # that should replace [MASK] words:  {masked_sentence}"""
+        # # prompt = f"Return just words in Romani language that should be logical replacement for [MASK] in given context: {masked_sentence}"
+
+        prompt = self.llama_structured_prompt_creator.get_masking_prompt(masked_sentence)
 
         # Generate prediction using the model
         output = self.replicate_model.predict_structured_output(
@@ -52,11 +59,13 @@ class EvaluationEngine:
 
     def predict_masked_words(self, masked_sentence):
         self.logger.info(f"masked_sentence: " + masked_sentence)
-        # Prepare the prompt for Llama 3.1
-        prompt = f"""
-        Please create export as json format list containing words in Romani language
-        that should replace [MASK] words:  {masked_sentence}"""
-        # prompt = f"Return just words in Romani language that should be logical replacement for [MASK] in given context:  {masked_sentence}"
+        # # Prepare the prompt for Llama 3.1
+        # prompt = f"""
+        # Please create export as json format list containing words in Romani language
+        # that should replace [MASK] words:  {masked_sentence}"""
+        # # prompt = f"Return just words in Romani language that should be logical replacement for [MASK] in given context:  {masked_sentence}"
+
+        prompt = self.llama_structured_prompt_creator.get_masking_prompt(masked_sentence)
 
         self.logger.info(f"predict_masked_word prompt: " + str(prompt))
 
@@ -161,15 +170,18 @@ class EvaluationEngine:
                 raise
 
 
-    def evaluate_cloze_test(self, masked_words, predicted_words):
+    def evaluate_cloze_test(self, masked_words, predicted_words_list):
+
+        predicted_candidates_list = [predicted_word["words_list"] for predicted_word in predicted_words_list]
+
         correct = 0
         total = len(masked_words)
         masked_predicted = dict()
         for idx, masked_word in enumerate(masked_words):
-            predicted_word = predicted_words[idx]
-            if masked_word.lower() == predicted_word.lower():
+            predicted_top_candidates_lower_list = [predicted_candidate.lower() for predicted_candidate in predicted_candidates_list[idx]]
+            if masked_word.lower() in predicted_top_candidates_lower_list:
                 correct += 1
-            masked_predicted[masked_word] = predicted_word
+            masked_predicted[masked_word] = predicted_top_candidates_lower_list
         accuracy = correct / total * 100
         self.logger.info(f"Cloze Test Accuracy: {accuracy:.2f}%")
         return correct, total, masked_predicted
