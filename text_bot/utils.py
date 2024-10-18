@@ -9,6 +9,15 @@ from pathlib import Path
 import time
 import functools
 import datetime
+from fuzzywuzzy import process as fuzzywuzzyProcess
+
+
+def find_closest_match(query, choices):
+    # Get a list of matches ordered by score, default limit to 5
+
+    result = fuzzywuzzyProcess.extractOne(query, choices)
+    closest_match, score = result[0], result[1]
+    return closest_match
 
 
 def convert_json_string_to_dict(json_string):

@@ -193,8 +193,8 @@ class LlamaStructuredPromptCreator:
 
         prompt = f"""
         Please create export as json format list containing words in Romani language
-        that should replace [MASK] words. For every single masked word, please provide
-        list of TOP 5 candidate words that can replace [MASK]:  
+        that should fit in place of [MASK] words. For every single masked word, please provide
+        list of TOP 5 candidate words that can fit in place of [MASK] so sentence make sense in given context:  
         {masked_sentence}"""
         return prompt
 
