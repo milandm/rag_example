@@ -84,6 +84,8 @@ class VectorizeDocumentsEngine:
         total_next_word_correct = 0
         total_next_word_total = 0
 
+        total_fuzzy_cloze_correct = 0
+
         masked_predicted_list = list()
 
         for document_pages in documents:
@@ -99,7 +101,15 @@ class VectorizeDocumentsEngine:
                     cloze_sample, masked_words = self.evaluation_engine.create_cloze_test_samples(text_chunk)
                     predicted_words_list = self.evaluation_engine.predict_masked_words(cloze_sample)
 
-                    cloze_correct, cloze_total, masked_predicted = self.evaluation_engine.evaluate_cloze_test(masked_words, predicted_words_list)
+                    cloze_output = self.evaluation_engine.evaluate_cloze_test(masked_words, predicted_words_list)
+
+                    cloze_accuracy = cloze_output["accuracy"]
+                    cloze_fuzzy_accuracy = cloze_output["fuzzy_accuracy"]
+                    cloze_correct = cloze_output["correct"]
+                    cloze_fuzzy_correct = cloze_output["fuzzy_correct"]
+                    cloze_total = cloze_output["total"]
+                    masked_predicted = cloze_output["masked_predicted"]
+
 
                     masked_predicted_list.append(masked_predicted)
 
@@ -107,11 +117,17 @@ class VectorizeDocumentsEngine:
                     total_cloze_correct += cloze_correct
                     total_cloze_total += cloze_total
 
+                    total_fuzzy_cloze_correct += cloze_fuzzy_correct
+
+
         # Calculate overall accuracies
         overall_cloze_accuracy = (total_cloze_correct / total_cloze_total) * 100 if total_cloze_total > 0 else 0
 
+        overall_cloze_fuzzy_accuracy = (total_fuzzy_cloze_correct / total_cloze_total) * 100 if total_cloze_total > 0 else 0
+
         # Log the overall accuracies
         self.logger.info(f"Overall Cloze Test Accuracy across all documents: {overall_cloze_accuracy:.2f}%")
+        self.logger.info(f"Overall Cloze Test Fuzzy Accuracy across all documents: {overall_cloze_fuzzy_accuracy:.2f}%")
         self.logger.info(f"masked_predicted_list across all documents: {masked_predicted_list}")
 
 

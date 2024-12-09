@@ -6,7 +6,7 @@ from text_bot.nlp_model.llm_structured_output_models.llama_masked_word_export im
 import json
 from text_bot.utils import retry
 from text_bot.nlp_model.rag.llama_structured_prompt_creator import LlamaStructuredPromptCreator, STRUCTURED_OUTPUT_SYSTEM_PROMPT
-
+from text_bot.utils import find_closest_match
 
 
 class EvaluationEngine:
@@ -211,6 +211,7 @@ class EvaluationEngine:
         self.logger.info("evaluate_cloze_test masked_words: " + str(masked_words))
 
         correct = 0
+        fuzzy_correct = 0
         total = len(masked_words)
         masked_predicted = dict()
         for idx, masked_word in enumerate(masked_words):
@@ -218,12 +219,30 @@ class EvaluationEngine:
             if idx < len(predicted_candidates_list):
                 predicted_top_candidates_lower_list = [predicted_candidate.lower()
                                                        for predicted_candidate in predicted_candidates_list[idx]]
+
+                closest_match, score = find_closest_match(masked_word.lower(), predicted_top_candidates_lower_list)
+                if score > 0.5:
+                    fuzzy_correct += score
+
                 if masked_word.lower() in predicted_top_candidates_lower_list:
                     correct += 1
+
             masked_predicted[masked_word] = predicted_top_candidates_lower_list
+
+
         accuracy = correct / total * 100
+        fuzzy_accuracy = fuzzy_correct / total * 100
+
         self.logger.info(f"Cloze Test Accuracy: {accuracy:.2f}%")
-        return correct, total, masked_predicted
+        output = {
+            "accuracy":accuracy,
+            "fuzzy_accuracy":fuzzy_accuracy,
+            "correct":correct,
+            "fuzzy_correct": fuzzy_correct,
+            "total":total,
+            "masked_predicted":masked_predicted
+        }
+        return output
 
 
 

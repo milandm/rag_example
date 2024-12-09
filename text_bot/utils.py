@@ -17,7 +17,7 @@ def find_closest_match(query, choices):
 
     result = fuzzywuzzyProcess.extractOne(query, choices)
     closest_match, score = result[0], result[1]
-    return closest_match
+    return closest_match, score/100
 
 
 def convert_json_string_to_dict(json_string):

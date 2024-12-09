@@ -167,12 +167,10 @@ class LlamaStructuredPromptCreator:
         JSON schema:
         [
           {
-            "language": "Romani",
-            "words_list": ["Džavipen", ...]
+            "words_list": ["some_candidate_word", ...]
           },
           {
-            "language": "Romani",
-            "words_list": ["bajrarikeribaskoro, ..."]
+            "words_list": ["some_candidate_word, ..."]
           },...]
 
 
