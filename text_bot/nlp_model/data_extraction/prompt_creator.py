@@ -5,13 +5,18 @@ sys.path.append("..")
 import json
 
 from text_bot.nlp_model.nlp_model import NlpModel
-from text_bot.utils import remove_quotes, extract_single_value_openai_content, extract_clean_json_data
+from text_bot.utils import (remove_quotes,
+                            extract_single_value_openai_content,
+                            extract_clean_json_data)
+from text_bot.nlp_model.ngrams_utils import map_tokens_to_fields
+from pydantic import BaseModel
+from custom_logger.universal_logger import UniversalLogger
 
 # SENTENCE_MIN_LENGTH = 15
 SENTENCE_MIN_LENGTH = 2
 
-from text_bot.nlp_model.rag.prompt_template_creator import \
-    ExtractionPromptTemplateCreator, \
+from text_bot.nlp_model.data_extraction.prompt_template_creator import \
+    PromptTemplateCreator, \
     SYSTEM_MSG_TITLE, \
     TITLE_EXTRACT_KEY, \
     DOCUMENT_SYSTEM_MSG_COMPRESSION_V3, \
@@ -19,14 +24,56 @@ from text_bot.nlp_model.rag.prompt_template_creator import \
     DOCUMENT_SYSTEM_MSG_COMPRESSION_CHECK_V1, \
     DOCUMENT_SYSTEM_MSG_SEMANTIC_TEXT_CHUNKING_V1, \
     DOCUMENT_SYSTEM_MSG_QUESTION_STATEMENT_V1, \
-    DOCUMENT_SYSTEM_MSG_QUESTION_RELATED_INFORMATION_V1
+    DOCUMENT_SYSTEM_MSG_QUESTION_RELATED_INFORMATION_V1, \
+    CERTIFICATE_DATA_EXTRACT_KEY
 
 
-class ExtractionPromptCreator:
+class PromptCreator:
 
     def __init__(self, nlp_model: NlpModel):
         self.model = nlp_model
-        self.prompt_template_creator = ExtractionPromptTemplateCreator()
+        self.prompt_template_creator = PromptTemplateCreator()
+        self.logger = UniversalLogger('./log_files/app.log', max_bytes=1048576, backup_count=3)
+
+
+    def extract_document_data(self, documents_txt: str):
+        document_data_prompt = self.prompt_template_creator.get_document_data_prompt(documents_txt)
+        document_data_openai_response = self.model.send_prompt(SYSTEM_MSG_TITLE, document_data_prompt)
+        document_data_content = document_data_openai_response.choices[0].message.content
+        document_data = extract_single_value_openai_content(document_data_content, CERTIFICATE_DATA_EXTRACT_KEY)
+        return document_data
+
+    def evaluate_document_extraction(self, ocr_document_extraction: dict,
+                                     di_document_extraction: dict,
+                                     structured_output_model: BaseModel):
+        document_data_prompt = self.prompt_template_creator.get_document_extraction_evaluation(str(ocr_document_extraction), str(di_document_extraction))
+        document_data_openai_response = self.model.send_prompt_structured_output(SYSTEM_MSG_TITLE, document_data_prompt, structured_output_model)
+        document_data_content = document_data_openai_response.choices[0].message.content
+        return document_data_content
+
+
+    def extract_document_data_structured_output(self, documents_txt: str, structured_output_model: BaseModel):
+        document_data_prompt = self.prompt_template_creator.get_document_data_prompt(documents_txt)
+        document_data_openai_response = self.model.send_prompt_structured_output(SYSTEM_MSG_TITLE, document_data_prompt, structured_output_model)
+        document_data_content = document_data_openai_response.choices[0].message.parsed
+
+        fields_confidence_percentage = map_tokens_to_fields(document_data_openai_response)
+        # fields_confidence_percentage = self.create_confidence_dict_for_structured_output(document_data_content,
+        #     words_confidence_percentage_dict )
+        self.logger.info("fields_confidence_percentage: "+str(fields_confidence_percentage))
+        return document_data_content, fields_confidence_percentage
+
+    def extract_document_data_structured_output_material_groups_list(self, documents_txt: str, structured_output_model: BaseModel, material_groups_list):
+        document_data_prompt = self.prompt_template_creator.get_document_data_prompt_material_groups_list(documents_txt, material_groups_list)
+        self.logger.info("extract_document_data_structured_output_material_groups_list document_data_prompt: "+str(document_data_prompt))
+        document_data_openai_response = self.model.send_prompt_structured_output(SYSTEM_MSG_TITLE, document_data_prompt, structured_output_model)
+        document_data_content = document_data_openai_response.choices[0].message.parsed
+
+        fields_confidence_percentage = map_tokens_to_fields(document_data_openai_response)
+        # fields_confidence_percentage = self.create_confidence_dict_for_structured_output(document_data_content,
+        #     words_confidence_percentage_dict)
+        self.logger.info("fields_confidence_percentage: " + str(fields_confidence_percentage))
+        return document_data_content, fields_confidence_percentage
 
 
     def get_document_title(self, first_documents_split_txt: str):
@@ -64,8 +111,9 @@ class ExtractionPromptCreator:
         return three_question_statements_list
 
 
-    def get_question_related_informations(self, question: str, section_text):
-        question_related_information_prompt = self.prompt_template_creator.get_question_related_information(question, section_text)
+    def get_question_related_informations(self, psychological_state: str, section_text):
+        question_related_information_prompt = self.prompt_template_creator.get_question_related_information(psychological_state, section_text)
+        print("get_question_related_informations question_related_information_prompt: " + question_related_information_prompt)
         question_related_information_openai_response = \
             self.model.send_prompt(DOCUMENT_SYSTEM_MSG_QUESTION_RELATED_INFORMATION_V1, question_related_information_prompt)
         print(str(question_related_information_openai_response))

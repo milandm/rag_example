@@ -19,8 +19,8 @@ combine_template = """
 PREVIOUS:
 {previous}
 
-Are you sure that ANSWER contains all the information related to QUESTION that could be found in given text.
-Complete answer should be formatted this way:
+Da li si siguran da ANSWER sadrzi sve informacije koje se pominju u dokumentaciji vezano za QUESTION.
+Kompletan odgovor treba da bude u dole zadatom formatu:
 
 ```
 QUESTION: <the question>
@@ -39,10 +39,10 @@ SOURCES: <list the sources used from those provided above>
 
 synopsis_template = """
 
-You are an clinical trials expert.
-Your goal is to provide information from given sources.
-You should always state the source document for info you provide. 
-Answer should be provided in format given below:
+Ti si ekspert za zakone u oblasti klinickih istrazivanja.
+Tvoj zadatak je da pruzis informacije iz datih izvora.
+Treba da navedes dokument u kom si pronasao odgovor.
+Odgovor treba da bude u dole zadatom formatu:
 
 ```
 QUESTION: <the question>
@@ -67,8 +67,8 @@ combine_template = """
 PREVIOUS:
 {previous}
 
-Are you sure that PREVIOUS contains all the information related to QUESTION that could be found in given text.
-Answer should be provided in format given below:
+Da li si siguran da PREVIOUS sadrzi sve informacije koje se pominju u dokumentaciji vezano za QUESTION.
+Kompletan odgovor treba da bude u dole zadatom formatu:
 
 ```
 QUESTION: <the question>
@@ -120,10 +120,10 @@ RECOMMEND_PROMPT_TEMPLATE = """
 
 SYSTEM_MSG_EXPERT = """
 
-You are an clinical trials expert.
-Your goal is to provide information from given sources.
-You should always state the source document for info you provide. 
-Answer should be provided in format given below:
+Ti si ekspert za zakone u oblasti klinickih istrazivanja.
+Tvoj zadatak je da pruzis informacije iz datih izvora.
+Treba da navedes dokument u kom si pronasao odgovor.
+Odgovor treba da bude u dole zadatom formatu:
 
 ```
 RESULT: {
@@ -140,22 +140,136 @@ RESULT: {
 
 
 SYSTEM_MSG_TITLE = """
-Extract title from the given text.
-Answer should be formatted following the way below:
-
-```
-TITLE: <title you extracted>
-```
+You are someone who check and validate certificates for companies
 """
 
 TITLE_EXTRACT_KEY = "TITLE:"
+
+CERTIFICATE_DATA_EXTRACT_KEY = "EXPORT:"
+
+DOCUMENT_EXTRACTION_EVALUATION_V1 = """
+OCR_DOCUMENT_EXTRACTION: ocr_document_extraction
+
+DI_DOCUMENT_EXTRACTION: di_document_extraction
+
+Please, compare OCR_DOCUMENT_EXTRACTION "pdf_loaded" and "ocr_loaded" vs  DI_DOCUMENT_EXTRACTION "documents_content",
+please enlist if some of these fields missed something compared to each other.
+
+Please compare OCR_DOCUMENT_EXTRACTION and DI_DOCUMENT_EXTRACTION corresponding fields one by one,
+and enlist if there is any difference, entitle which EXTRACTION contains more accurate field value.
+
+Both extractions should contain these values:
+
+"certification_authority",
+"certificate_type",
+"certification_date_valid_from",
+"certification_date_valid_to",
+"company_name",
+"company_address",
+"expiration_date",
+"material_group",
+"all_important_fields",
+"official_company_name"
+
+If EXTRACTION doesn't contain some of these value please mark this extraction as FAILED,
+and please explain which value is not EXTRACTED and explain why. 
+
+Export should contain these values:
+- best_content_extraction -  OCR_DOCUMENT_EXTRACTION "pdf_loaded" and "ocr_loaded" content vs DI_DOCUMENT_EXTRACTION "documents_content" content which is better
+- ocr_missing_info - OCR_DOCUMENT_EXTRACTION "pdf_loaded" and "ocr_loaded" content missing information list compare to DI_DOCUMENT_EXTRACTION "documents_content" content
+- di_missing_info - DI_DOCUMENT_EXTRACTION "documents_content" content missing information list compared to OCR_DOCUMENT_EXTRACTION "pdf_loaded" and "ocr_loaded" content
+- ocr_failed_fields - list of extraction failed fields in OCR_DOCUMENT_EXTRACTION 
+- di_failed_fields - list of extraction failed fields in DI_DOCUMENT_EXTRACTION
+- ocr_succeed - all fields are extracted successfully True of False 
+- di_succeed - all fields are extracted successfully True of False 
+- explanation - if ocr_succeed or di_succeed is False, this field should contain explanation, why
+
+Export should be formatted as:
+EXPORT:
+{
+    "best_content_extraction": "some_value",
+    "ocr_missing_info": "some_value",
+    "di_missing_info": "some_value",
+    "ocr_failed_fields": "some_value",
+    "di_failed_fields": "some_value",
+    "ocr_succeed": "some_value",
+    "di_succeed": "some_value",
+    "explanation": "some_value"
+}
+
+"""
+
+
+EXTRACT_CERTIFICATE_DATA_V1 = """
+DOCUMENT_CONTENT: $document_content
+
+From DOCUMENT_CONTENT extract fields: 
+- certification_authority- certification authority
+- certificate_type- certificate type
+- certification_date_valid_from- certification date valid from 
+- certification_date_valid_to- certification date valid to
+- company_name - company name
+- company_address - company address
+- expiration_date - expiration date
+
+Export should be formatted as:
+EXPORT:
+{
+    "certification_authority": certification authority value
+    "certificate_type": certificate type value
+    "certification_date_valid_from": certification date valid from value
+    "certification_date_valid_to": certification date valid to value
+    "company_name": company name value
+    "company_address": company address value
+    "expiration_date": expiration date value
+}
+
+"""
+
+EXTRACT_CERTIFICATE_DATA_V2 = """
+
+CERTIFICATE_SCOPE_LIST: $certificate_scope_list
+
+CERTIFICATE_DOCUMENT_CONTENT: $document_content
+
+From CERTIFICATE_DOCUMENT_CONTENT extract fields: 
+- certification_authority- certification authority
+- certificate_type- certificate type
+- certification_date_valid_from- certification date valid from 
+- certification_date_valid_to- certification date valid to
+- company_name - company name
+- company_address - company address
+- expiration_date - expiration date
+- material_group - certificate scope, if CERTIFICATE_DOCUMENT_CONTENT scope is close to any scope label from CERTIFICATE_SCOPE_LIST, please add that scope label value to material_group field 
+
+- all_important_fields - key value dictionary of all string sequences in the DOCUMENT_CONTENT that could refer to some important information as label and that value
+
+
+
+
+
+Export should be formatted as:
+EXPORT:
+{
+    "certification_authority": certification authority value
+    "certificate_type": certificate type value
+    "certification_date_valid_from": certification date valid from value
+    "certification_date_valid_to": certification date valid to value
+    "company_name": company name value
+    "company_address": company address value
+    "expiration_date": expiration date value
+    "material_group": material group value
+    "all_important_fields": all important fields label and value dict
+}
+
+"""
 
 
 TITLE_TEMPLATE = """
 
 DOCUMENT_SPLIT: $document_split
 
-Extract title from the DOCUMENT_SPLIT text
+Izdvoj naslov iz DOCUMENT_SPLIT teksta
 """
 
 
@@ -499,7 +613,6 @@ Subsection Title: [Details of Subsection]
 Subsection Content Summary: [Brief summary or key points of this subsection]
 Subsection Text :[Here provide subsection full original text content]
 Subsection References:[List of all important concepts and terms that this subsections refers to  taking in account whole containing section text]
-Subsection References:[List of all important concepts and terms that this subsection refers to  taking in account whole containing section text]
 Subsection Topics:[List of all topics and terms that this subsection refers to  taking in account whole containing section text]
 
 
@@ -530,7 +643,7 @@ Output should look like this:
 
 
 DOCUMENT_SYSTEM_MSG_QUESTION_STATEMENT_V1 = """
-You are expert for clinical trial research and you should check if given response is correct.
+You are psychologist and wise man and you should find best motivational quotes to support users current psychological state.
 """
 
 QUESTION_STATEMENT_PROMPT_TEMPLATE_V1 = """
@@ -541,6 +654,13 @@ $question
 
 THREE_QUESTION_STATEMENTS_PROMPT_TEMPLATE_V1= """
 Formulate given question as a statement in three different ways. 
+Export json list of strings:
+
+QUESTION: $question 
+"""
+
+THREE_QUESTION_STATEMENTS_PROMPT_TEMPLATE_V2= """
+Formulate given question or statement as a statement in three different ways. 
 Export json list of strings:
 
 QUESTION: $question 
@@ -626,12 +746,119 @@ PLease check if this ANSWER contains all information requested by QUESTION.
 
 """
 
+QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V3 = """
+PSYCHOLOGICAL_STATE: $psychological_state
+SECTION_TEXT: $section_text
+
+From given SECTION_TEXT extract !!!MAXIMUM 3!!! !!!MOTIVATIONAL QUOTES!!! which are best to support person facing explained PSYCHOLOGICAL_STATE.
+    1. Dont give any additional explanation, just enlist related quotes
+    1. Enlist with bullet points all motivational quotes related to given PSYCHOLOGICAL_STATE!!!
+    2. Quotes should be exactly the same as given in SECTION_TEXT!!!
+
+If there is no any related information, please always answer with this answer:
+NO RELEVANT INFO    
+
+Output should be just valid json list look like this:
+[{"some quote": "quote source"},
+    {"some quote": "quote source"},
+    {"some quote": "quote source"}]
+"""
+
+QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V5 = """
+PSYCHOLOGICAL_STATE: $psychological_state
+SECTION_TEXT: $section_text
+
+From given SECTION_TEXT extract !!!MAXIMUM 3!!! !!!MOTIVATIONAL QUOTES!!! which are best to support person facing explained PSYCHOLOGICAL_STATE.
+    1. Dont give any additional explanation, just enlist related quotes
+    1. Enlist with bullet points all motivational quotes related to given PSYCHOLOGICAL_STATE!!!
+    2. Quotes should be exactly the same as given in SECTION_TEXT!!!
+
+If there is no any related information, please always answer with this answer:
+NO RELEVANT INFO    
+
+Output should be json look like this:
+[{"some quote": "quote source"},
+    {"some quote": "quote source"},
+    {"some quote": "quote source"}]
+
+"""
+
+QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V4 = """
+PSYCHOLOGICAL_STATE: $psychological_state
+SECTION_TEXT: $section_text
+
+From given SECTION_TEXT extract !!!MAXIMUM 3!!! !!!MOTIVATIONAL QUOTES!!! which are best to support person facing explained PSYCHOLOGICAL_STATE.
+    1. Dont give any additional explanation, just enlist related quotes
+    1. Enlist with bullet points all motivational quotes related to given PSYCHOLOGICAL_STATE!!!
+    2. Quotes should be exactly the same as given in SECTION_TEXT!!!
+
+ANSWER should be formatted as json list.
+
+If there is no any related information, please always answer with this answer:
+NO RELEVANT INFO    
+
+PLease check if this ANSWER contains all MOTIVATIONAL quotes related to explained PSYCHOLOGICAL_STATE.
+
+Output should look like this:
+ANSWER: [
+    {"some quote": "quote source"},
+    {"some quote": "quote source"},
+    {"some quote": "quote source"}
+]
+
+"""
+
+
+# ```json
+# [
+#   {
+#     "Section Title": "I. УВОДНЕ ОДРЕДБЕ",
+#     "Section Content Summary": "Introduction to the regulation specifying the content and labeling of external and internal packaging of medicines, additional labeling, and the content of the medicine instructions.",
+#     "Section Text": "I. УВОДНЕ ОДРЕДБЕ\nСадржина правилника\nЧлан 1.\nОвим правилником прописује се садржај и начин обележавања спољњег и унутрашњег паковања\nлека, додатно обележавање лека, као и садржај упутства за лек.",
+#     "Section References": ["правилник", "лек", "спољње паковање", "унутрашње паковање", "обележавање", "упутство за лек"],
+#     "Subsection Topics": ["Садржина правилника", "обележавање", "упутство за лек"],
+#     "Subsections": [
+#       {
+#         "Subsection Title": "Садржина правилника",
+#         "Subsection Content Summary": "Defines the regulation of the content and labeling of external and internal packaging of medicines, additional labeling, and the content of the medicine instructions.",
+#         "Subsection Text": "Члан 1.\nОвим правилником прописује се садржај и начин обележавања спољњег и унутрашњег паковања\nлека, додатно обележавање лека, као и садржај упутства за лек.",
+#         "Subsection References": ["правилник", "лек", "спољње паковање", "унутрашње паковање", "обележавање", "упутство за лек"],
+#         "Subsection Topics": ["правилник", "обележавање", "упутство за лек"]
+#       }
+#     ]
+#   },
+#   {
+#     "Section Title": "II. САДРЖАЈ И НАЧИН ОБЕЛЕЖАВАЊА СПОЉЊЕГ ПАКОВАЊА ЛЕКА",
+#     "Section Content Summary": "Details the requirements for the content and method of labeling the external packaging of medicines.",
+#     "Section Text": "II. САДРЖАЈ И НАЧИН ОБЕЛЕЖАВАЊА СПОЉЊЕГ ПАКОВАЊА ЛЕКА\nЧлан 5.\nСпољње паковање лека јесте паковање у коме се налази унутрашње паковање лека.\nЧлан 6.\nНа спољњем паковању лека, кao и на паковању код кога унутрашње паковање уједно представља и спољње паковање лека, морају да буду наведени следећи подаци: [followed by a list of required information]",
+#     "Section References": ["спољње паковање", "лек", "обележавање", "информације"],
+#     "Subsection Topics": ["Спољње паковање лека", "обележавање", "информације"],
+#     "Subsections": [
+#       {
+#         "Subsection Title": "Спољње паковање лека",
+#         "Subsection Content Summary": "Defines what is considered the external packaging of a medicine.",
+#         "Subsection Text": "Члан 5.\nСпољње паковање лека јесте паковање у коме се налази унутрашње паковање лека.",
+#         "Subsection References": ["спољње паковање", "лек"],
+#         "Subsection Topics": ["спољње паковање"]
+#       },
+#       {
+#         "Subsection Title": "Обележавање спољњег паковања лека",
+#         "Subsection Content Summary": "Lists the specific information that must be included on the external packaging of medicines.",
+#         "Subsection Text": "Члан 6.\nНа спољњем паковању лека, кao и на паковању код кога унутрашње паковање уједно представља и спољње паковање лека, морају да буду наведени следећи подаци: [followed by a list of required information]",
+#         "Subsection References": ["спољње паковање", "лек", "обележавање", "информације"],
+#         "Subsection Topics": ["обележавање", "информације"]
+#       }
+#     ]
+#   }
+# ]
+
+
 
 # please summarize all most important information from given text related to this question
 # extract all important information from given text related to this question
 # extract enlist and summarize all important information from given text related to this question
 
-class ExtractionPromptTemplateCreator:
+class PromptTemplateCreator:
 
 
     def __init__(self):
@@ -692,6 +919,19 @@ class ExtractionPromptTemplateCreator:
         # prepared_prompt = template.format_map(mapping=mapping)
         return prepared_prompt
 
+    def get_document_extraction_evaluation(self, ocr_document_extraction: str, di_document_extraction: str) -> str:
+        user_prompt = self.prepare_template(DOCUMENT_EXTRACTION_EVALUATION_V1,
+                                            ocr_document_extraction=ocr_document_extraction,
+                                            di_document_extraction=di_document_extraction)
+        return user_prompt
+
+    def get_document_data_prompt(self, document_content: str) -> str:
+        user_prompt = self.prepare_template(EXTRACT_CERTIFICATE_DATA_V1, document_content=document_content)
+        return user_prompt
+
+    def get_document_data_prompt_material_groups_list(self, document_content: str, material_groups_list: list) -> str:
+        user_prompt = self.prepare_template(EXTRACT_CERTIFICATE_DATA_V2, document_content=document_content, certificate_scope_list=str(material_groups_list))
+        return user_prompt
 
     def get_title_extract_prompt(self, document_split: str) -> str:
         user_prompt = self.prepare_template(TITLE_TEMPLATE, document_split=document_split)
@@ -702,12 +942,12 @@ class ExtractionPromptTemplateCreator:
         return user_prompt
 
     def get_three_question_statements(self, question: str) -> str:
-        user_prompt = self.prepare_template(THREE_QUESTION_STATEMENTS_PROMPT_TEMPLATE_V1, question=question)
+        user_prompt = self.prepare_template(THREE_QUESTION_STATEMENTS_PROMPT_TEMPLATE_V2, question=question)
         return user_prompt
 
-    def get_question_related_information(self, question: str, section_text: str) -> str:
-        user_prompt = self.prepare_template(QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V1,
-                                            question=question,
+    def get_question_related_information(self, psychological_state: str, section_text: str) -> str:
+        user_prompt = self.prepare_template(QUESTION_RELATED_INFORMATION_PROMPT_TEMPLATE_V3,
+                                            psychological_state=psychological_state,
                                             section_text=section_text)
         return user_prompt
 

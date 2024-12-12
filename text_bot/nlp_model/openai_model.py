@@ -19,24 +19,18 @@ import numpy as np
 from text_bot.utils import retry
 from pydantic import BaseModel
 
-
-
 EMBEDDING_MODEL = "text-embedding-3-small"
 # LLM_MODEL = "gpt-3.5-turbo"
 # LLM_MODEL = "gpt-4"
 LLM_MODEL ="gpt-4o"
 LLM_MODEL_STRUCTURED_OUTPUT = "gpt-4o-2024-08-06"
 
-
-IMAGE_MODEL = "dall-e-3"
-IMAGE_SIZE = "1024x1024"
-IMAGE_QUALITY = "standard"
-
 # MAX_CHARACTERS = MAX_TOKENS x 4
 # MAX_TOKENS = 4095
 # MAX_TOKENS = 8192
 MAX_TOKENS = 4096
 # MAX_TOKENS = 1024
+
 
 class OpenaiModel(NlpModel):
 
@@ -69,9 +63,12 @@ class OpenaiModel(NlpModel):
             temperature=0,
             top_p=1,
             frequency_penalty=0,
-            presence_penalty=0
+            presence_penalty=0,
+            logprobs=True,
+            top_logprobs=2
         )
         return response
+
 
     @retry(max_retries=3, initial_delay=1, backoff=2)
     def send_prompt_structured_output(self, system_msg: str,
@@ -82,9 +79,10 @@ class OpenaiModel(NlpModel):
             messages=[{"role": "system", "content": system_msg},
                        {"role": "user", "content": user_prompt}],
             response_format=structured_output_model,
+            logprobs=True,
+            top_logprobs=2
         )
         return response
-
 
 
     def get_embeddings(self, sentences: List[str]) -> List[List[float]]:
