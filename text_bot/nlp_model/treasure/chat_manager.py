@@ -21,7 +21,7 @@ from text_bot.views.models import (CTDocumentSection,
                                    CTDocumentSubsectionText,
                                    QuotesDocuments)
 
-from text_bot.nlp_model.treasure.prompt_creator import PromptCreator
+from text_bot.nlp_model.rag.prompt_creator import PromptCreator
 from custom_logger.universal_logger import UniversalLogger
 from text_bot.nlp_model.image_utils import generate_image
 from django.http import HttpRequest
