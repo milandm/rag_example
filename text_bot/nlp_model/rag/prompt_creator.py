@@ -22,7 +22,7 @@ from text_bot.nlp_model.rag.prompt_template_creator import \
     DOCUMENT_SYSTEM_MSG_QUESTION_RELATED_INFORMATION_V1
 
 
-class ExtractionPromptCreator:
+class PromptCreator:
 
     def __init__(self, nlp_model: NlpModel):
         self.model = nlp_model
