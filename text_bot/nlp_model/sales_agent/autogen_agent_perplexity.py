@@ -90,6 +90,17 @@ class AutogenAgentPerplexity:
         self.logger = UniversalLogger('./log_files/app.log', max_bytes=1048576, backup_count=3)
 
 
+        # create a UserProxyAgent instance named "user_proxy"
+        self.user_proxy_feedback = autogen.UserProxyAgent(
+            name="user_proxy",
+            human_input_mode="ALWAYS",
+            is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
+            code_execution_config={
+                "use_docker": False
+            },
+            # Please set use_docker=True if docker is available to run the generated code. Using docker is safer than running the generated code directly.
+        )
+
 
         self.assistant_agent = autogen.AssistantAgent(
             name="ComplianceAssistantAgent",
