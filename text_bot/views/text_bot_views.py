@@ -91,65 +91,6 @@ class PublicTextExtractionAPIView(GenericViewSet):
             return Response(response.json(), status=response.status_code)
 
 
-class PublicSlesAgentAPIView(GenericViewSet):
-    serializer_class = TextbotOutputSerializer
-    pagination_class = CustomPagination
-
-    @swagger_auto_schema(
-        method="GET",
-        # manual_parameters=[openapi.Parameter('Authorization', openapi.IN_HEADER,
-        #                                      description="Token {auth_token}",
-        #                                      type=openapi.TYPE_STRING)],
-        # request_body=textbot_input_schema,
-        responses={
-            200: textbot_output_schema,
-            403: "Forbidden",
-        },
-        tags=["Public chat"],
-    )
-    @action(methods=["GET"], detail=True)
-    def get_chat_response(self, request: Request):
-        logger = UniversalLogger('./log_files/app.log', max_bytes=1048576, backup_count=3)
-        print(request.META)
-
-        chat_manager = ChatManager(OpenaiModel(), OpenaiMml())
-
-        input = request.query_params.get('input', '')
-        print("input"+input)
-        # history_key = request.query_params.get('history_key', '')
-
-        open_ai_response = chat_manager.send_user_query(input)
-
-        open_ai_response_json = json.loads(open_ai_response)
-
-        response_dict_format = dict()
-        response_dict_format[open_ai_response_json["quote1"]] = open_ai_response_json["author1"]
-        response_dict_format[open_ai_response_json["quote2"]] = open_ai_response_json["author2"]
-        response_dict_format[open_ai_response_json["quote3"]] = open_ai_response_json["author3"]
-
-        logger.info("response_dict_format created "+ str(response_dict_format))
-        try:
-            # formated_response_list = json.loads(response_dict)
-            image_url = chat_manager.get_image(request, response_dict_format)
-        except Exception as e:
-            logger.error(e)
-
-        response_dict = dict()
-        response_dict["image_url"] = image_url
-        response_dict["quotes"] = response_dict_format
-
-        logger.info("response_dict created " + str(response_dict))
-        response = response_dict
-        # response = JsonResponse(response_dict)
-
-        if response:
-            return Response(response)  # return the data in the DRF Response
-        else:
-            print("Your request failed")
-            return Response(response.json(), status=response.status_code)
-
-
-
 class PublicTextBotAPIView(GenericViewSet):
     serializer_class = TextbotOutputSerializer
     pagination_class = CustomPagination
