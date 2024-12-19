@@ -6,6 +6,7 @@ from drf_yasg.generators import OpenAPISchemaGenerator
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 from text_bot.views.text_bot_views import chatbot_demo
+from text_bot.views.text_bot_views import up_sale_chatbot_demo
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -49,6 +50,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     path('chatbot-demo/', chatbot_demo, name='chatbot_demo'),
+
+    path('upsale-chatbot-demo/', up_sale_chatbot_demo, name='up_sale_chatbot_demo'),
+
 ]
 
 

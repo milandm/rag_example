@@ -29,9 +29,22 @@ from django.shortcuts import render
 import json
 from custom_logger.universal_logger import UniversalLogger
 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 def chatbot_demo(request):
     return render(request, 'rag_example/chat_bot.html')
+
+def up_sale_chatbot_demo(request):
+    return render(request, 'rag_example/up_sale_chat_bot.html')
+
+def trigger_websocket(request):
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        "sync_group",
+        {"type": "start_communication"}
+    )
+    return JsonResponse({"status": "Message sent"})
 
 
 class TopChatsView(GenericViewSet):

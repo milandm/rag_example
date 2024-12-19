@@ -80,7 +80,7 @@ class AutogenAgentPerplexity:
 
 
 
-    def __init__(self, nlp_model :NlpModel):
+    def __init__(self, nlp_model :NlpModel, human_ask_callback: callable):
         self.model = nlp_model
         self.prompt_creator = PromptCreator(nlp_model)
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=MAX_CHUNK_SIZE, chunk_overlap=MAX_CHUNK_OVERLAP_SIZE)
@@ -89,17 +89,47 @@ class AutogenAgentPerplexity:
         self.markdown_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=HEADERS_TO_SPLIT_ON)
         self.logger = UniversalLogger('./log_files/app.log', max_bytes=1048576, backup_count=3)
 
+        self.human_ask_callback = human_ask_callback
 
-        # create a UserProxyAgent instance named "user_proxy"
-        self.user_proxy_feedback = autogen.UserProxyAgent(
-            name="user_proxy",
-            human_input_mode="ALWAYS",
-            is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
-            code_execution_config={
-                "use_docker": False
-            },
-            # Please set use_docker=True if docker is available to run the generated code. Using docker is safer than running the generated code directly.
-        )
+        human_interaction_assistant = ConversableAgent(
+            name="human_interaction_assistant",
+            system_message="""You can ask for help from a human 
+            expert using the ask_human_expert function.""")
+
+        @human_interaction_assistant.register_for_llm(description="Function for asking human expert.")
+        async def ask_human_expert(question: Annotated[str, "The question you want to ask the human expert."]) -> \
+        Annotated[str, "Answer"]:
+            # Instead of input(), call the asynchronous method on AutogenAgentPerplexity
+            return await self.ask_human_expert(question)
+
+
+        # human_input_mode = "ALWAYS",
+
+        # create agent calling function that asks for human input
+
+        # assistant = ConversableAgent(name="assistant",
+        #                              system_message=f"You are an AI assistant. You can ask for help from a human expert using the ask_human_expert function.")
+        # user_proxy = UserProxyAgent(name="user proxy")
+        #
+        # @assistant.register_for_llm(description="Function for asking human expert.")
+        # @user_proxy.register_for_execution()
+        # def ask_human_expert(question: Annotated[str, "The question you want to ask the human expert."]) -> Annotated[
+        #     str, "Answer"]:
+        #     answer = input(f"Please answer the question: {question}\n")
+        #     return answer
+        #
+        # user_proxy.initiate_chat(assistant, "Hey what is the age of the bedrock in grand canyon?")
+
+        # # create a UserProxyAgent instance named "user_proxy"
+        # self.user_proxy_feedback = autogen.UserProxyAgent(
+        #     name="user_proxy",
+        #     human_input_mode="ALWAYS",
+        #     is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
+        #     code_execution_config={
+        #         "use_docker": False
+        #     },
+        #     # Please set use_docker=True if docker is available to run the generated code. Using docker is safer than running the generated code directly.
+        # )
 
 
         self.assistant_agent = autogen.AssistantAgent(
@@ -240,6 +270,11 @@ class AutogenAgentPerplexity:
         )
 
 
+    async def ask_human_expert(self, question: str) -> str:
+        # This calls the callback provided by ChatConsumer to send the question
+        # and wait for the user’s response.
+        return await self.human_ask_callback(question)
+
 
     def run_group_agent(self):
 
@@ -283,3 +318,18 @@ def enrich_dnb_data(dnb_individual: dict):
 def get_inconsistencies(dnb_individual: dict, matching_list:List[Dict]):
     prompt_creator = PromptCreator(PerplexityApi())
     return prompt_creator.get_inconsistencies(dnb_individual, matching_list)
+
+
+def propose_question_for_human():
+    assistant = ConversableAgent(name="assistant",
+                                 system_message=f"You are an AI assistant. You can ask for help from a human expert using the ask_human_expert function.")
+    user_proxy = UserProxyAgent(name="user proxy")
+
+    @assistant.register_for_llm(description="Function for asking human expert.")
+    @user_proxy.register_for_execution()
+    def ask_human_expert(question: Annotated[str, "The question you want to ask the human expert."]) -> Annotated[
+        str, "Answer"]:
+        answer = input(f"Please answer the question: {question}\n")
+        return answer
+
+    user_proxy.initiate_chat(assistant, "Hey what is the age of the bedrock in grand canyon?")

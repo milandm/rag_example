@@ -3,6 +3,75 @@ from sentence_transformers import SentenceTransformer
 from pgvector.django import CosineDistance, L2Distance
 from text_bot.ai_utils import get_distance_scores, check_distance_scores_out
 
+
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+from django.utils import timezone
+
+from django.http import JsonResponse
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
+
+import uuid
+import asyncio
+
+class ChatManager:
+    def __init__(self, consumer):
+        self.consumer = consumer
+        self.pending_requests = {}  # Map of request_id -> asyncio Future
+
+
+    async def process_client_request(self, message):
+        """
+        Process messages from the client.
+        """
+        action = message.get("action")
+        request_id = message.get("requestId")
+
+        if action == "serverTime":
+            # Simulate server-side processing
+            response = {"requestId": request_id, "data": {"serverTime": "Processed Time Response"}}
+            await self.consumer.send_json(response)
+
+
+    async def send_request_to_client(self, message):
+        """
+        Send a request to the client and wait for a response synchronously.
+        """
+        request_id = str(uuid.uuid4())
+        message["requestId"] = request_id
+
+        # Create a future to wait for the response
+        loop = asyncio.get_event_loop()
+        future = loop.create_future()
+        self.pending_requests[request_id] = future
+
+        # Send the message to the client
+        await self.consumer.send_json(message)
+
+        # Wait for a response with timeout
+        try:
+            response = await asyncio.wait_for(future, timeout=10)
+            return response
+        except asyncio.TimeoutError:
+            del self.pending_requests[request_id]
+            return {"error": "Timeout waiting for client response"}
+
+
+    def handle_client_response(self, response):
+        """
+        Handle responses coming back from the client.
+        """
+        request_id = response.get("requestId")
+        if request_id in self.pending_requests:
+            self.pending_requests[request_id].set_result(response)
+            del self.pending_requests[request_id]
+
+
+
+
+
 class TopChatQuestionsManager(models.Manager):
 
     def add_chat_question_to_top_chat_pool(self, question_text: str, history_key:str):

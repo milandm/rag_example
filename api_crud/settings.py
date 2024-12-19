@@ -77,8 +77,20 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
     'oauth2_provider',
+    'channels',
+    'channels.layers'
 ]
 
+WSGI_APPLICATION = 'api_crud.wsgi.application'
+ASGI_APPLICATION = 'api_crud.asgi.application'
+# ASGI_APPLICATION = "api_crud.routing.application"
+
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',

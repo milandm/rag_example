@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            max-width: 600px;
+            margin: auto;
+            width: 100%;
+        }
+        #chat-log {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+        }
+        #chat-log p {
+            margin: 10px 0;
+        }
+        .image-container {
+            position: relative;
+            margin-top: 10px;
+        }
+        .image-container img {
+            max-width: 100%;
+            border-radius: 5px;
+        }
+        #chat-form {
+            display: flex;
+            width: 100%;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+        }
+        #message {
+            flex: 1;
+            padding: 10px;
+            font-size: 1.1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+            box-sizing: border-box;
+            width: calc(100% - 80px);
+        }
+        #chat-form button {
+            padding: 10px 20px;
+            font-size: 1.1em;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 60px;
+        }
+        #chat-form button:hover {
+            background-color: #0056b3;
+        }
+        /* Spinner styles */
+        #spinner {
+            display: none;
+            margin: auto;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #007bff;
+            width: 24px;
+            height: 24px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="chat-container">
+    <div id="chat-log"></div>
+    <div id="spinner"></div> <!-- Spinner element -->
+    <form id="chat-form">
+        <input type="text" name="message" id="message" placeholder="Type your message..." autocomplete="off" required>
+        <button type="submit">Send</button>
+    </form>
+</div>
+
+<script>
+    (function() {
+        const chatLog = document.getElementById('chat-log');
+        const messageInput = document.getElementById('message');
+        const spinner = document.getElementById('spinner');
+        const chatForm = document.getElementById('chat-form');
+
+        let pendingRequestId = null; // Store requestId if server asks a question
+        let ws;
+
+        function connectWebSocket() {
+
+
+            {#const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');#}
+
+            {#chatSocket.onmessage = function(e) {#}
+            {#    const data = JSON.parse(e.data);#}
+            {#    const message = data['message'];#}
+            {#    // Handle incoming message#}
+            {#};#}
+            {##}
+            {#chatSocket.onclose = function(e) {#}
+            {#    console.error('Chat socket closed unexpectedly');#}
+            {#};#}
+            {##}
+            {#// Send message to server#}
+            {#function sendMessage(message) {#}
+            {#    chatSocket.send(JSON.stringify({#}
+            {#        'message': message#}
+            {#    }));#}
+            {#}#}
+
+
+
+
+            // Replace 'ws://localhost:8000/ws/chat/' with your WebSocket endpoint
+            {#ws = new WebSocket('ws://0.0.0.0:8000/ws/chat/');#}
+            {#ws = new WebSocket('ws://' + window.location.host + '/ws/chat/')#}
+            ws = new WebSocket('ws://localhost:8000/ws/chat/');
+
+            ws.onopen = function() {
+                console.log("WebSocket connection opened.");
+            };
+
+            ws.onmessage = function(event) {
+                spinner.style.display = 'none';
+                const data = JSON.parse(event.data);
+                handleServerMessage(data);
+            };
+
+            ws.onclose = function() {
+                console.log("WebSocket connection closed, attempting to reconnect in 5 seconds...");
+                setTimeout(connectWebSocket, 5000);
+            };
+
+            ws.onerror = function(error) {
+                console.log("WebSocket error:", error);
+            };
+        }
+
+        function handleServerMessage(data) {
+            // Check the action field to decide how to handle
+            if (data.action === 'askHuman') {
+                // The agent is asking a human a question
+                // Display the question in the chat and store the requestId
+                appendMessage('Agent', data.question);
+                pendingRequestId = data.requestId;
+            } else {
+                // Normal response from server
+                if (data.message) {
+                    appendMessage('Agent', data.message);
+                }
+                if (data.image_url) {
+                    appendImage(data.image_url);
+                }
+            }
+        }
+
+        function appendMessage(speaker, text) {
+            const p = document.createElement('p');
+            p.innerHTML = `<strong>${speaker}:</strong> ${text}`;
+            chatLog.appendChild(p);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        function appendImage(url) {
+            const container = document.createElement('div');
+            container.className = 'image-container';
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = "Generated Image";
+            container.appendChild(img);
+            chatLog.appendChild(container);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        chatForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const userInput = messageInput.value.trim();
+            if (!userInput) return;
+
+            appendMessage('You', userInput);
+            spinner.style.display = 'block';
+
+            // If there's a pending question from the server, respond to it
+            // otherwise send a normal message
+            if (pendingRequestId) {
+                const responseMsg = {
+                    requestId: pendingRequestId,
+                    answer: userInput
+                };
+                ws.send(JSON.stringify(responseMsg));
+                pendingRequestId = null;
+            } else {
+                const userMsg = { message: userInput };
+                ws.send(JSON.stringify(userMsg));
+            }
+
+            messageInput.value = '';
+        });
+
+        // Initialize WebSocket connection
+        connectWebSocket();
+    })();
+</script>
+
+</body>
+</html>

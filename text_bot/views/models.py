@@ -18,8 +18,19 @@ from text_bot.views.managers import TopChatQuestionsManager,\
                                      CTDocumentSubsectionTopicsManager
 
 
-# { input: searchQuery, history_key: historyKey }
+# class ChatMessage(models.Model):
+#     room_name = models.CharField(max_length=255)
+#     sender = models.CharField(max_length=100)
+#     message = models.TextField()
+#     timestamp = models.DateTimeField(auto_now_add=True)
+#
+#     def __str__(self):
+#         return f"[{self.room_name}] {self.sender}: {self.message}"
+#
+#
 
+
+# { input: searchQuery, history_key: historyKey }
 class TextbotOutput(models.Model):
     history_key = models.CharField(max_length=100)
 
