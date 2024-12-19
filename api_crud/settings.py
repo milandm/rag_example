@@ -64,6 +64,9 @@ REST_FRAMEWORK = {
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',
+    'channels.layers',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -73,22 +76,32 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
+    'api_crud',
     'text_bot',
     'drf_yasg',
     'corsheaders',
     'oauth2_provider',
-    'channels',
-    'channels.layers'
 ]
 
-WSGI_APPLICATION = 'api_crud.wsgi.application'
+# WSGI_APPLICATION = 'api_crud.wsgi.application'
+# # ASGI_APPLICATION = '.asgi.application'ASGI_APPLICATION
+# # ASGI_APPLICATION = "api_crud.routing.application"
+# ASGI_APPLICATION = "asgi:application"
+
+# WSGI_APPLICATION = 'api_crud.wsgi.application'
+#
+# # ************************************ #
+# # ADDED
 ASGI_APPLICATION = 'api_crud.asgi.application'
-# ASGI_APPLICATION = "api_crud.routing.application"
 
 
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        # "CONFIG": {
+        #     # "hosts": [("127.0.0.1", 6379)],
+        #     "hosts": [("0.0.0.0", 8000)],
+        # },
     },
 }
 
